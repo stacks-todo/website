@@ -2,7 +2,7 @@
   "name": "stacks-website",
   "version": "0.1.0",
   "private": true,
-  "description": "「Stacks」のランディングページ / プロダクトサイト。",
+  "description": "「STACKS」のランディングページ / プロダクトサイト。",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",

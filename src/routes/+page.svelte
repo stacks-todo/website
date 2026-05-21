@@ -2,7 +2,7 @@
 	import logo from '$lib/assets/img/title_logo.svg';
 
 	const BASE_URL = 'https://stacks-todo.com';
-	const TITLE = 'Stacks — 忙しさを、美しく。';
+	const TITLE = 'STACKS — 忙しさを、美しく。';
 	const DESCRIPTION =
 		'Google Tasks と連携してタスクをボールとして表示するインテリア型デバイス。回転する外枠でキー入力なしに操作できます。';
 	const OG_IMAGE = `${BASE_URL}/og-image.png`;
@@ -10,10 +10,10 @@
 	const jsonLd = {
 		'@context': 'https://schema.org',
 		'@type': 'Product',
-		name: 'Stacks',
+		name: 'STACKS',
 		description: DESCRIPTION,
 		url: BASE_URL,
-		brand: { '@type': 'Brand', name: 'Stacks' }
+		brand: { '@type': 'Brand', name: 'STACKS' }
 	};
 </script>
 
@@ -25,7 +25,7 @@
 	<!-- Open Graph -->
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content={BASE_URL} />
-	<meta property="og:site_name" content="Stacks" />
+	<meta property="og:site_name" content="STACKS" />
 	<meta property="og:title" content={TITLE} />
 	<meta property="og:description" content={DESCRIPTION} />
 	<meta property="og:image" content={OG_IMAGE} />
