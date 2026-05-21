@@ -1,0 +1,36 @@
+{
+  "name": "stacks-website",
+  "version": "0.1.0",
+  "private": true,
+  "description": "「Stacks」のランディングページ / プロダクトサイト。",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "deploy": "npm run build && wrangler pages deploy .svelte-kit/cloudflare"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/stacks-todo/website/issues"
+  },
+  "homepage": "https://github.com/stacks-todo/website#readme",
+  "dependencies": {
+    "@master/css": "^2.0.0-rc.69",
+    "@master/css-server": "^2.0.0-rc.69",
+    "@master/css.vite": "^2.0.0-rc.69",
+    "@master/normal.css": "^3.3.1"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-cloudflare": "^7.2.8",
+    "@sveltejs/kit": "^2.60.1",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "svelte": "^5.55.9",
+    "svelte-check": "^4.4.8",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.13",
+    "wrangler": "^4.93.0"
+  }
+}
