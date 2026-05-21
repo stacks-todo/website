@@ -46,7 +46,7 @@
 </svelte:head>
 
 <div
-	class="flex flex:column ai:center jc:center gap:40px min-height:100vh bg:#50C2FB color:white text-align:center px:24"
+	class="flex flex:column ai:center jc:center gap:40px min-height:100vh bg:#18A9BD color:white text-align:center px:24"
 >
 	<div class="h:100px">
 		<img
