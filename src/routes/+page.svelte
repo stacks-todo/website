@@ -1,5 +1,8 @@
 <script lang="ts">
-	import logo from '$lib/assets/img/title_logo.svg';
+	import SiteHeader from '$lib/components/home/SiteHeader.svelte';
+	import Hero from '$lib/components/home/Hero.svelte';
+	import About from '$lib/components/home/About.svelte';
+	import Steps from '$lib/components/home/Steps.svelte';
 
 	const BASE_URL = 'https://stacks-todo.com';
 	const TITLE = 'STACKS — 忙しさを、美しく。';
@@ -45,26 +48,10 @@
 	{@html `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`}
 </svelte:head>
 
-<div
-	class="flex flex:column ai:center jc:center gap:40px min-height:100vh bg:#18A9BD color:white text-align:center px:24"
->
-	<div class="h:100px">
-		<img
-			class="brightness(0)|invert(1) h:full obj:contain"
-			src={logo}
-			alt="title logo"
-		/>
-	</div>
+<SiteHeader />
 
-	<div class="flex flex:column gap:10px">
-		<p
-			class="font:1em font-weight:600 letter-spacing:.25em text-transform:uppercase color:white"
-		>
-			Under Construction
-		</p>
-
-		<p class="font:16 color:white max-width:360px line-height:1.7">
-			近日公開予定。
-		</p>
-	</div>
-</div>
+<main>
+	<Hero />
+	<About />
+	<Steps />
+</main>

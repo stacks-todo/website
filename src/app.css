@@ -22,7 +22,10 @@ body:lang(ja) {
 
 body {
 	margin: 0;
-	overflow: hidden;
+	background: #fff;
 	-webkit-font-smoothing: antialiased;
-	touch-action: none;
+}
+
+html {
+	scroll-behavior: smooth;
 }
