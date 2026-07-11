@@ -22,7 +22,8 @@
     "@master/css-server": "^2.0.0-rc.69",
     "@master/css.vite": "^2.0.0-rc.69",
     "@master/normal.css": "^3.3.1",
-    "@types/node": "^25.9.1"
+    "@types/node": "^25.9.1",
+    "lenis": "^1.3.25"
   },
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "^7.2.8",
