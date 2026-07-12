@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { resolve } from "$app/paths";
   import Task from "$lib/components/Task.svelte";
   import Notch from "$lib/components/Notch.svelte";
@@ -8,6 +9,238 @@
   import desc02 from "$lib/assets/img/desc_02.png";
   import desc03 from "$lib/assets/img/desc_03.png";
   import { icon } from "$lib/assets/icons";
+
+  type BallColor = "red" | "orange" | "blue";
+
+  interface Ball {
+    color: BallColor;
+    r: number;
+    angle: number;
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+  }
+
+  const initialBalls: {
+    color: BallColor;
+    size: number;
+    rot: number;
+    leftFrac: number;
+    bottom: number;
+  }[] = [
+    { color: "red", size: 600, rot: 20, leftFrac: -0.05, bottom: -100 },
+    { color: "red", size: 360, rot: -10, leftFrac: 0.45, bottom: -100 },
+    { color: "orange", size: 250, rot: 12, leftFrac: 0.87, bottom: -80 },
+    { color: "orange", size: 250, rot: 10, leftFrac: 0.22, bottom: -50 },
+    { color: "blue", size: 120, rot: -10, leftFrac: 0.38, bottom: -20 },
+    { color: "blue", size: 120, rot: 20, leftFrac: 0.62, bottom: 160 },
+    { color: "orange", size: 250, rot: -12, leftFrac: 0.68, bottom: 300 },
+    { color: "blue", size: 120, rot: -25, leftFrac: 0.81, bottom: 40 },
+    { color: "blue", size: 120, rot: 15, leftFrac: 0.3, bottom: 60 },
+  ];
+
+  const GRAVITY = 0.5;
+  const FRICTION = 0.985;
+  const RESTITUTION = 0.15;
+  const RESOLVE_ITERS = 6;
+  const GAP = 10;
+  const WALL_OVERFLOW = 50;
+  const BURST_RADIUS = 500;
+  const BURST_POWER = 16;
+  const ROLL_TO_DEG = 180 / Math.PI;
+  const RESTING_VY = 1;
+  const SLEEP_SPEED_SQ = 0.05;
+  const SLEEP_FRAMES = 45;
+  const SPAWN_STAGGER = 40;
+
+  let footerEl: HTMLElement | undefined = $state();
+  let balls: Ball[] = $state.raw([]);
+  let rafId: number | undefined;
+  let idleFrames = 0;
+  let spawned = false;
+
+  function isNearBottom(): boolean {
+    if (!footerEl) return false;
+    const r = footerEl.getBoundingClientRect();
+    return r.top < window.innerHeight * 0.6;
+  }
+
+  function isHidden(): boolean {
+    if (!footerEl) return true;
+    const r = footerEl.getBoundingClientRect();
+    return r.top > window.innerHeight * 0.9;
+  }
+
+  function spawnBalls(width: number, height: number) {
+    balls = initialBalls.map((b, i) => {
+      const r = b.size / 2;
+      return {
+        color: b.color,
+        r,
+        angle: b.rot,
+        x: b.leftFrac * width + r,
+        y: -r - i * SPAWN_STAGGER - Math.random() * SPAWN_STAGGER,
+        vx: 0,
+        vy: 0,
+      };
+    });
+  }
+
+  function maxSpeedSq(): number {
+    let max = 0;
+    for (const b of balls) {
+      const s = b.vx * b.vx + b.vy * b.vy;
+      if (s > max) max = s;
+    }
+    return max;
+  }
+
+  function physicsStep(width: number, height: number) {
+    for (const b of balls) {
+      b.vy += GRAVITY;
+      b.vx *= FRICTION;
+      b.vy *= FRICTION;
+      b.x += b.vx;
+      b.y += b.vy;
+      b.angle += (b.vx / b.r) * ROLL_TO_DEG;
+    }
+
+    for (let iter = 0; iter < RESOLVE_ITERS; iter++) {
+      for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+          const bi = balls[i];
+          const bj = balls[j];
+          const dx = bj.x - bi.x;
+          const dy = bj.y - bi.y;
+          const dist = Math.hypot(dx, dy);
+          const minDist = bi.r + bj.r + GAP;
+          if (dist < minDist && dist > 0.01) {
+            const nx = dx / dist;
+            const ny = dy / dist;
+            const push = (minDist - dist) * 0.5;
+            bi.x -= nx * push;
+            bi.y -= ny * push;
+            bj.x += nx * push;
+            bj.y += ny * push;
+
+            const rv = (bj.vx - bi.vx) * nx + (bj.vy - bi.vy) * ny;
+            if (rv < 0) {
+              const imp = rv * (1 + RESTITUTION) * 0.5;
+              bi.vx += imp * nx;
+              bi.vy += imp * ny;
+              bj.vx -= imp * nx;
+              bj.vy -= imp * ny;
+            }
+          }
+        }
+      }
+    }
+
+    for (const b of balls) {
+      const left = -WALL_OVERFLOW + b.r;
+      const right = width + WALL_OVERFLOW - b.r;
+      const floor = height + WALL_OVERFLOW - b.r;
+
+      if (b.x < left) {
+        b.x = left;
+        if (b.vx < 0) b.vx = -b.vx * RESTITUTION;
+      } else if (b.x > right) {
+        b.x = right;
+        if (b.vx > 0) b.vx = -b.vx * RESTITUTION;
+      }
+
+      if (b.y > floor) {
+        b.y = floor;
+        if (b.vy > RESTING_VY) {
+          b.vy = -b.vy * RESTITUTION;
+        } else if (b.vy > 0) {
+          b.vy = 0;
+        }
+      }
+    }
+  }
+
+  function burst(cx: number, cy: number) {
+    for (const b of balls) {
+      const dx = b.x - cx;
+      const dy = b.y - cy;
+      const dist = Math.hypot(dx, dy) || 1;
+      if (dist < BURST_RADIUS) {
+        const power = BURST_POWER * (1 - dist / BURST_RADIUS);
+        b.vx += (dx / dist) * power;
+        b.vy += (dy / dist) * power - power * 0.4;
+      }
+    }
+  }
+
+  function wake() {
+    idleFrames = 0;
+    if (rafId === undefined) {
+      rafId = requestAnimationFrame(loop);
+    }
+  }
+
+  function loop() {
+    rafId = undefined;
+    if (!footerEl) return;
+
+    physicsStep(footerEl.clientWidth, footerEl.clientHeight);
+    balls = balls.map((b) => ({ ...b }));
+
+    idleFrames = maxSpeedSq() < SLEEP_SPEED_SQ ? idleFrames + 1 : 0;
+    if (idleFrames < SLEEP_FRAMES) {
+      rafId = requestAnimationFrame(loop);
+    }
+  }
+
+  function handleFooterClick(e: MouseEvent) {
+    if (!footerEl) return;
+    const rect = footerEl.getBoundingClientRect();
+    burst(e.clientX - rect.left, e.clientY - rect.top);
+    wake();
+  }
+
+  function handleFooterKeydown(e: KeyboardEvent) {
+    if (!footerEl || (e.key !== "Enter" && e.key !== " ")) return;
+    const rect = footerEl.getBoundingClientRect();
+    burst(rect.width / 2, rect.height / 2);
+    wake();
+  }
+
+  function trySpawn() {
+    if (spawned || !footerEl || !isNearBottom()) return;
+    spawned = true;
+    spawnBalls(footerEl.clientWidth, footerEl.clientHeight);
+    wake();
+  }
+
+  function tryReset() {
+    if (!spawned || !isHidden()) return;
+    spawned = false;
+    balls = [];
+    idleFrames = 0;
+    if (rafId !== undefined) {
+      cancelAnimationFrame(rafId);
+      rafId = undefined;
+    }
+  }
+
+  onMount(() => {
+    if (!footerEl) return;
+    trySpawn();
+
+    const onScroll = () => {
+      trySpawn();
+      tryReset();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId !== undefined) cancelAnimationFrame(rafId);
+    };
+  });
 
   const BASE_URL = "https://stacks-todo.com";
   const TITLE = "STACKS — 忙しさを、美しく。";
@@ -86,7 +319,6 @@
   <meta name="description" content={DESCRIPTION} />
   <link rel="canonical" href={BASE_URL} />
 
-  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content={BASE_URL} />
   <meta property="og:site_name" content="STACKS" />
@@ -98,14 +330,12 @@
   <meta property="og:image:alt" content={TITLE} />
   <meta property="og:locale" content="ja_JP" />
 
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={TITLE} />
   <meta name="twitter:description" content={DESCRIPTION} />
   <meta name="twitter:image" content={OG_IMAGE} />
   <meta name="twitter:image:alt" content={TITLE} />
 
-  <!-- JSON-LD -->
   {@html `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`}
 </svelte:head>
 
@@ -387,8 +617,30 @@
     </div>
   </div>
 
-  <footer class="bg:#333333 rel w:full h:calc(100dvh-96px) r:48px p:80px flex flex:column gap:60px overflow:hidden">
-    <div class="flex flex:row gap:100px ai:end">
+  <footer
+    bind:this={footerEl}
+    class="bg:#333333 rel w:full h:calc(100dvh-96px) r:48px p:80px flex flex:column gap:60px overflow:hidden"
+  >
+    <div
+      class="abs inset:0 z:0"
+      role="button"
+      tabindex="0"
+      onclick={handleFooterClick}
+      onkeydown={handleFooterKeydown}
+    >
+      {#each balls as ball, i (i)}
+        <div
+          class="abs pointer-events:none"
+          style="left:{ball.x - ball.r}px; top:{ball.y -
+            ball.r}px; width:{ball.r * 2}px; height:{ball.r *
+            2}px; transform: rotate({ball.angle}deg);"
+        >
+          <Task color={ball.color} size={ball.r * 2} class="" />
+        </div>
+      {/each}
+    </div>
+
+    <div class="rel z:1 flex flex:row gap:100px ai:end">
       <div class="w:200px">
         <Logo color="#fff" />
       </div>
@@ -401,17 +653,8 @@
         {/each}
       </div>
     </div>
-    <div>
+    <div class="rel z:1">
       <p class="fg:#A6A3A2">&copy; 2026 STACKS</p>
     </div>
-	<div>
-		<Task color="red" size={600} r={20} class="abs bottom:-100px left:-100px" />
-		<Task color="orange" size={250} r={10} class="abs bottom:-50px left:500px" />
-		<Task color="blue" size={120} r={-10} class="abs bottom:220px left:510px" />
-		<Task color="blue" size={120} r={-10} class="abs bottom:-20px left:770px" />
-		<Task color="red" size={360} r={-10} class="abs bottom:-100px left:910px" />
-		<Task color="blue" size={120} r={20} class="abs bottom:160px left:1260px" />
-		<Task color="orange" size={250} r={-20} class="abs bottom:-50px left:1350px" />
-	</div>
   </footer>
 </main>
