@@ -1,0 +1,44 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "meta_title": "STACKS — Turning Busyness into Beauty",
+  "meta_description": "Turn Busyness into Beauty. “STACKS,” an Interior-Style Task Management Solution",
+
+  "nav_about": "About",
+  "nav_movie": "Movie",
+  "nav_how_to_use": "How to Use",
+  "nav_news": "News",
+  "nav_buy": "Buy Now",
+  "lang_switch_aria": "Switch language",
+
+  "hero_pv_title_alt": "Turning busyness into beauty.",
+  "hero_pv_alt": "STACKS device showing task volume with a rotating outer frame and task balls",
+
+  "about_heading": "Task management\ncan be more fun.",
+  "about_p1": "Task management — something we repeat every single day.",
+  "about_p2": "That's exactly why it shouldn't just be convenient.\nThe time you spend on it should feel good, too.",
+  "about_p3": "STACKS is a dedicated display that syncs with your task management app.",
+  "about_p4": "Just place it on your desk to check your tasks and watch your progress,",
+  "about_p5": "a little more fun, a little more beautiful —\nturning everyday task management into a steady stream of accomplishment.",
+
+  "movie_heading": "Movie",
+
+  "howto_heading": "How to Use",
+  "howto_subheading": "How to use",
+  "howto_label": "About STACKS",
+  "howto1_title": "Sync with your task app\nto visualize what's left to do",
+  "howto1_body": "A product designed to make clearing your backlog of tasks more fun and easier.\nDesigned with real care for its quality as a piece of interior decor.",
+  "howto1_alt": "Illustration of syncing with a task management app to visualize remaining tasks",
+  "howto2_title": "App content syncs\nto the device display",
+  "howto2_body": "A product designed to make clearing your backlog of tasks more fun and easier.\nDesigned with real care for its quality as a piece of interior decor.",
+  "howto2_alt": "Illustration of app content syncing to the device display",
+  "howto3_title": "Check and complete tasks\nright from the device display",
+  "howto3_body": "A product designed to make clearing your backlog of tasks more fun and easier.\nDesigned with real care for its quality as a piece of interior decor.",
+  "howto3_alt": "Illustration of checking and completing tasks from the device display",
+
+  "news_heading": "News",
+  "news_subheading": "News",
+
+  "footer_top_aria": "Back to the top of the STACKS page",
+  "footer_social_aria": "STACKS official {label} (opens in a new tab)",
+  "footer_copyright": "© 2026 STACKS"
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "meta_title": "STACKS — 忙しさを、美しく。",
+  "meta_description": "忙しさを、美しく。インテリア型タスク管理ソリューション「Stacks」",
+
+  "nav_about": "STACKS とは",
+  "nav_movie": "Movie",
+  "nav_how_to_use": "使い方",
+  "nav_news": "ニュース",
+  "nav_buy": "購入する",
+  "lang_switch_aria": "言語を切り替える",
+
+  "hero_pv_title_alt": "忙しさを、美しく。",
+  "hero_pv_alt": "回転する外枠とタスクボールでタスク量を表示するSTACKS本体",
+
+  "about_heading": "タスク管理は、\nもっと楽しくていい。",
+  "about_p1": "毎日繰り返すタスク管理。",
+  "about_p2": "だからこそ、\nただ便利なだけではなく、\n使う時間そのものが心地よい体験であってほしい。",
+  "about_p3": "STACKSは、タスク管理アプリと連携する専用ディスプレイです。",
+  "about_p4": "デスクに置くだけで、タスクを確認し、進捗を眺め、",
+  "about_p5": "少し楽しく、少し美しく。\n日常のタスク管理を、達成を積み重ねる。",
+
+  "movie_heading": "Movie",
+
+  "howto_heading": "使い方",
+  "howto_subheading": "How to use",
+  "howto_label": "STACKSとは",
+  "howto1_title": "タスク管理アプリと連携し、\n残りのタスク量を可視化",
+  "howto1_body": "溜まったタスクの解消をより楽しく、より簡単にするプロダクト。\nインテリアとしてのクオリティも追求して設計している。",
+  "howto1_alt": "タスク管理アプリと連携し、残りのタスク量を可視化するイメージ",
+  "howto2_title": "アプリの内容が本体の\nディスプレイに同期される",
+  "howto2_body": "溜まったタスクの解消をより楽しく、より簡単にするプロダクト。\nインテリアとしてのクオリティも追求して設計している。",
+  "howto2_alt": "アプリの内容が本体のディスプレイに同期されるイメージ",
+  "howto3_title": "本体のディスプレイから\nタスクの確認、完了を行う",
+  "howto3_body": "溜まったタスクの解消をより楽しく、より簡単にするプロダクト。\nインテリアとしてのクオリティも追求して設計している。",
+  "howto3_alt": "本体のディスプレイからタスクの確認、完了を行うイメージ",
+
+  "news_heading": "お知らせ",
+  "news_subheading": "News",
+
+  "footer_top_aria": "STACKS ページ上部へ戻る",
+  "footer_social_aria": "STACKS 公式{label}（新しいタブで開く）",
+  "footer_copyright": "© 2026 STACKS"
+}

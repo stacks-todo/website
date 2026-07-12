@@ -4,13 +4,19 @@
   import Task from "$lib/components/Task.svelte";
   import Notch from "$lib/components/Notch.svelte";
   import Logo from "$lib/components/Logo.svelte";
-  import pv from "$lib/assets/img/pv.png";
-  import pvOverlay from "$lib/assets/img/pv_overlay.png";
+  import pv from "$lib/assets/img/pv.png?enhanced";
+  import pvOverlay from "$lib/assets/img/pv_overlay.png?enhanced";
   import pvTitle from "$lib/assets/img/pv_title.svg";
-  import desc01 from "$lib/assets/img/desc_01.png";
-  import desc02 from "$lib/assets/img/desc_02.png";
-  import desc03 from "$lib/assets/img/desc_03.png";
+  import desc01 from "$lib/assets/img/desc_01.png?enhanced";
+  import desc02 from "$lib/assets/img/desc_02.png?enhanced";
+  import desc03 from "$lib/assets/img/desc_03.png?enhanced";
   import { icon } from "$lib/assets/icons";
+  import { m } from "$lib/paraglide/messages";
+  import { getLocale, setLocale, locales, localizeHref, deLocalizeUrl } from "$lib/paraglide/runtime";
+
+  function lines(text: string): string[] {
+    return text.split("\n");
+  }
 
   type BallColor = "red" | "orange" | "blue";
 
@@ -244,7 +250,7 @@
   }
 
   function handleTopClick(e: MouseEvent) {
-    if (location.pathname !== resolve("/")) return;
+    if (deLocalizeUrl(location.href).pathname !== resolve("/")) return;
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: "smooth" });
     history.pushState(null, "", location.pathname);
@@ -271,10 +277,11 @@
   });
 
   const BASE_URL = "https://stacks-todo.com";
-  const TITLE = "STACKS — 忙しさを、美しく。";
-  const DESCRIPTION =
-    "Google Tasks と連携してタスクをボールとして表示するインテリア型デバイス。回転する外枠でキー入力なしに操作できます。";
+  const TITLE = m.meta_title();
+  const DESCRIPTION = m.meta_description();
   const OG_IMAGE = `${BASE_URL}/og-image.png`;
+  const CANONICAL_URL = getLocale() === "ja" ? BASE_URL : `${BASE_URL}/${getLocale()}`;
+  const OG_LOCALE = getLocale() === "ja" ? "ja_JP" : "en_US";
 
   const newsItems = [
     {
@@ -351,10 +358,13 @@
   <title>{TITLE}</title>
   <meta name="description" content={DESCRIPTION} />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href={BASE_URL} />
+  <link rel="canonical" href={CANONICAL_URL} />
+  <link rel="alternate" hreflang="ja" href={BASE_URL} />
+  <link rel="alternate" hreflang="en" href={`${BASE_URL}/en`} />
+  <link rel="alternate" hreflang="x-default" href={BASE_URL} />
 
   <meta property="og:type" content="website" />
-  <meta property="og:url" content={BASE_URL} />
+  <meta property="og:url" content={CANONICAL_URL} />
   <meta property="og:site_name" content="STACKS" />
   <meta property="og:title" content={TITLE} />
   <meta property="og:description" content={DESCRIPTION} />
@@ -362,7 +372,7 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content={TITLE} />
-  <meta property="og:locale" content="ja_JP" />
+  <meta property="og:locale" content={OG_LOCALE} />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={TITLE} />
@@ -382,33 +392,47 @@
     <ul class="flex flex:row gap:40px">
       <li>
         <a
-          href={resolve("/#about")}
-          onclick={(e) => handleAnchorClick(e, "about")}>STACKS とは</a
+          href={localizeHref(resolve("/#about"))}
+          onclick={(e) => handleAnchorClick(e, "about")}>{m.nav_about()}</a
         >
       </li>
       <li>
-        <a href={resolve("/#movie")} onclick={(e) => handleAnchorClick(e, "movie")}
-          >Movie</a
+        <a href={localizeHref(resolve("/#movie"))} onclick={(e) => handleAnchorClick(e, "movie")}
+          >{m.nav_movie()}</a
         >
       </li>
       <li>
-        <a href={resolve("/#how-to-use")} onclick={(e) => handleAnchorClick(e, "how-to-use")}
-          >使い方</a
+        <a href={localizeHref(resolve("/#how-to-use"))} onclick={(e) => handleAnchorClick(e, "how-to-use")}
+          >{m.nav_how_to_use()}</a
         >
       </li>
       <li>
-        <a href={resolve("/#news")} onclick={(e) => handleAnchorClick(e, "news")}
-          >ニュース</a
+        <a href={localizeHref(resolve("/#news"))} onclick={(e) => handleAnchorClick(e, "news")}
+          >{m.nav_news()}</a
         >
       </li>
     </ul>
-    <ul>
+    <ul class="flex flex:row gap:16px ai:center">
+      <li>
+        <ul class="flex flex:row gap:8px f:14px" aria-label={m.lang_switch_aria()}>
+          {#each locales as l}
+            <li>
+              <button
+                type="button"
+                onclick={() => setLocale(l)}
+                aria-current={getLocale() === l ? "true" : undefined}
+                class="fg:#393939 opacity:{getLocale() === l ? '1' : '.4'}"
+              >{l.toUpperCase()}</button>
+            </li>
+          {/each}
+        </ul>
+      </li>
       <li>
         <a
-          href={resolve("/")}
+          href={localizeHref(resolve("/"))}
           class="flex flex:row ai:center jc:center h:48px r:25px p:8px|30px gap:8px bg:#18A9BD fg:#fff fill:#fff>svg>path"
         >
-          <span>購入する</span>
+          <span>{m.nav_buy()}</span>
           <svg
             width="13"
             height="13"
@@ -508,18 +532,19 @@
     </div>
     <img
       src={pvTitle}
-      alt="忙しさを、美しく。"
+      alt={m.hero_pv_title_alt()}
       class="w:600px abs bottom:100px left:80px"
     />
-    <img
+    <enhanced:img
       src={pvOverlay}
       alt=""
-      class="obj:cover w:100% abs bottom:0 left:0 mix-blend-mode:overlay"
+      class="obj:cover w:100% h:auto abs bottom:0 left:0 mix-blend-mode:overlay"
     />
-    <img
+    <enhanced:img
       src={pv}
-      alt="回転する外枠とタスクボールでタスク量を表示するSTACKS本体"
-      class="obj:cover w:100%"
+      alt={m.hero_pv_alt()}
+      class="obj:cover w:full h:auto"
+      fetchpriority="high"
     />
   </div>
   <section class="flex flex:column ai:center py:200px rel" aria-labelledby="about">
@@ -557,21 +582,20 @@
         id="about"
         class="py:80px f:32px fg:#393939 f:bold line-height:1.5 letter-spacing:.02em text-align:center"
       >
-        タスク管理は、<br />もっと楽しくていい。
+        {#each lines(m.about_heading()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
       </h2>
     </div>
     <div
       class="pb:80px flex flex:column gap:40px f:16px color:#393939 line-height:2 text-align:center"
     >
-      <p>毎日繰り返すタスク管理。</p>
+      <p>{m.about_p1()}</p>
       <p>
-        だからこそ、<br />ただ便利なだけではなく、<br
-        />使う時間そのものが心地よい体験であってほしい。
+        {#each lines(m.about_p2()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
       </p>
-      <p>STACKSは、タスク管理アプリと連携する専用ディスプレイです。</p>
-      <p>デスクに置くだけで、タスクを確認し、進捗を眺め、</p>
+      <p>{m.about_p3()}</p>
+      <p>{m.about_p4()}</p>
       <p>
-        少し楽しく、少し美しく。<br />日常のタスク管理を、達成を積み重ねる。
+        {#each lines(m.about_p5()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
       </p>
     </div>
     <div class="w:200px">
@@ -585,11 +609,11 @@
         <Task color="orange" r={-10} size={40} class="abs top:20px left:0" />
         <Task color="blue" r={10} size={25} class="abs top:0 left:40px" />
       </div>
-      <h2 id="movie" class="f:40px f:bold">Movie</h2>
+      <h2 id="movie" class="f:40px f:bold">{m.movie_heading()}</h2>
     </div>
     <div class="w:1200px r:48px overflow:hidden b:16px|solid|#393939">
       <iframe
-        class="w:full video"
+        class="w:full video pointer-events:none"
         src="https://www.youtube.com/embed/emxMcyfFROg?&autoplay=1&amp;mute=1&loop=1&playlist=emxMcyfFROg&preload=none&playsinline=1&rel=0&modestbranding=1&color=white&cc_load_policy=1"
         title="YouTube video player"
         frameborder="0"
@@ -607,8 +631,8 @@
         <Task color="orange" r={-10} size={50} class="abs top:-25 left:64px" />
       </div>
       <div class="flex flex:column ai:center gap:10px">
-        <h2 id="how-to-use" class="f:40px fg:#393939 f:bold">使い方</h2>
-        <span class="f:25px fg:#989492 f:semibold">How to use</span>
+        <h2 id="how-to-use" class="f:40px fg:#393939 f:bold">{m.howto_heading()}</h2>
+        <span class="f:25px fg:#989492 f:semibold">{m.howto_subheading()}</span>
       </div>
       <div class="rel w:100px h:100px">
         <Task color="blue" r={10} size={30} class="abs top:20px left:0" />
@@ -644,20 +668,20 @@
                 />
               </svg>
             </span>
-            <p class="f:30px f:bold fg:#fff">STACKSとは</p>
+            <p class="f:30px f:bold fg:#fff">{m.howto_label()}</p>
           </div>
           <h3 class="f:40px f:semibold fg:#fff mb:100px">
-            タスク管理アプリと連携し、<br />残りのタスク量を可視化
+            {#each lines(m.howto1_title()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
           </h3>
           <p class="fg:#fff">
-            溜まったタスクの解消をより楽しく、より簡単にするプロダクト。<br
-            />インテリアとしてのクオリティも追求して設計している。
+            {#each lines(m.howto1_body()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
           </p>
         </div>
         <div class="abs w:740px top:0 right:0 z:0">
-          <img
+          <enhanced:img
             src={desc01}
-            alt="タスク管理アプリと連携し、残りのタスク量を可視化するイメージ"
+            alt={m.howto1_alt()}
+            class="w:100% h:auto"
           />
         </div>
       </div>
@@ -690,20 +714,20 @@
                 />
               </svg>
             </span>
-            <p class="f:30px f:bold fg:#fff">STACKSとは</p>
+            <p class="f:30px f:bold fg:#fff">{m.howto_label()}</p>
           </div>
           <h3 class="f:40px f:semibold fg:#fff mb:100px">
-            アプリの内容が本体の<br />ディスプレイに同期される
+            {#each lines(m.howto2_title()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
           </h3>
           <p class="fg:#fff">
-            溜まったタスクの解消をより楽しく、より簡単にするプロダクト。<br
-            />インテリアとしてのクオリティも追求して設計している。
+            {#each lines(m.howto2_body()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
           </p>
         </div>
-        <div class="abs w:800px top:0 right:-20px z:0">
-          <img
+        <div class="abs w:800px top:-20px right:-20px z:0">
+          <enhanced:img
             src={desc02}
-            alt="アプリの内容が本体のディスプレイに同期されるイメージ"
+            alt={m.howto2_alt()}
+            class="w:100% h:auto"
           />
         </div>
       </div>
@@ -736,20 +760,20 @@
                 />
               </svg>
             </span>
-            <p class="f:30px f:bold fg:#fff">STACKSとは</p>
+            <p class="f:30px f:bold fg:#fff">{m.howto_label()}</p>
           </div>
           <h3 class="f:40px f:semibold fg:#fff mb:100px">
-            本体のディスプレイから<br />タスクの確認、完了を行う
+            {#each lines(m.howto3_title()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
           </h3>
           <p class="fg:#fff">
-            溜まったタスクの解消をより楽しく、より簡単にするプロダクト。<br
-            />インテリアとしてのクオリティも追求して設計している。
+            {#each lines(m.howto3_body()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
           </p>
         </div>
-        <div class="abs w:740px top:0 right:0 z:0">
-          <img
+        <div class="abs w:740px top:-20px right:0 z:0">
+          <enhanced:img
             src={desc03}
-            alt="本体のディスプレイからタスクの確認、完了を行うイメージ"
+            alt={m.howto3_alt()}
+            class="w:100% h:auto"
           />
         </div>
       </div>
@@ -764,8 +788,8 @@
         <Task color="blue" r={20} size={20} class="abs top:-10 left:36px" />
       </div>
       <div class="flex flex:column ai:start gap:10px">
-        <h2 id="news" class="f:50px fg:#393939 f:bold">お知らせ</h2>
-        <span class="f:25px fg:#989492 f:semibold">News</span>
+        <h2 id="news" class="f:50px fg:#393939 f:bold">{m.news_heading()}</h2>
+        <span class="f:25px fg:#989492 f:semibold">{m.news_subheading()}</span>
       </div>
       <div class="rel w:60px h:100px">
         <Task color="orange" r={-10} size={40} class="abs top:-40px left:0" />
@@ -813,7 +837,7 @@
 
     <div class="rel z:1 flex flex:row gap:100px ai:end">
       <div class="w:200px">
-        <a href={resolve("/")} onclick={handleTopClick} aria-label="STACKS ページ上部へ戻る"
+        <a href={localizeHref(resolve("/"))} onclick={handleTopClick} aria-label={m.footer_top_aria()}
           ><Logo color="#fff" /></a
         >
       </div>
@@ -825,7 +849,7 @@
               href={link.link}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`STACKS 公式${link.label}（新しいタブで開く）`}
+              aria-label={m.footer_social_aria({ label: link.label })}
               >{@html icon(link.label)}</a
             >
           </div>
@@ -833,7 +857,7 @@
       </div>
     </div>
     <div class="rel z:1">
-      <p class="fg:#A6A3A2">&copy; 2026 STACKS</p>
+      <p class="fg:#A6A3A2">{m.footer_copyright()}</p>
     </div>
   </footer>
 </main>

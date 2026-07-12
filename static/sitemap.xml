@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://stacks-todo.com/</loc>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://stacks-todo.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://stacks-todo.com/en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://stacks-todo.com/" />
+  </url>
+  <url>
+    <loc>https://stacks-todo.com/en</loc>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://stacks-todo.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://stacks-todo.com/en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://stacks-todo.com/" />
   </url>
 </urlset>
