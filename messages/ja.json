@@ -21,6 +21,9 @@
   "about_p5": "少し楽しく、少し美しく。\n日常のタスク管理を、達成を積み重ねる。",
 
   "movie_heading": "Movie",
+  "movie_mute_aria": "動画の音声をオフにする",
+  "movie_unmute_aria": "動画の音声をオンにする",
+  "movie_watch_aria": "YouTubeで元動画を見る（新しいタブで開く）",
 
   "howto_heading": "使い方",
   "howto_subheading": "How to use",

@@ -234,6 +234,22 @@
     }
   }
 
+  const VIDEO_ID = "emxMcyfFROg";
+  let videoIframe: HTMLIFrameElement | undefined = $state();
+  let videoMuted = $state(true);
+
+  function postToPlayer(func: string) {
+    videoIframe?.contentWindow?.postMessage(
+      JSON.stringify({ event: "command", func, args: [] }),
+      "https://www.youtube.com",
+    );
+  }
+
+  function toggleVideoMute() {
+    postToPlayer(videoMuted ? "unMute" : "mute");
+    videoMuted = !videoMuted;
+  }
+
   const ANCHOR_OFFSET = 160;
 
   function scrollToAnchor(id: string, behavior: ScrollBehavior = "smooth") {
@@ -538,12 +554,14 @@
     <enhanced:img
       src={pvOverlay}
       alt=""
-      class="obj:cover w:100% h:auto abs bottom:0 left:0 mix-blend-mode:overlay"
+      sizes="100vw"
+      class="obj:cover w:100% h:100% abs bottom:0 left:0 mix-blend-mode:overlay"
     />
     <enhanced:img
       src={pv}
       alt={m.hero_pv_alt()}
-      class="obj:cover w:full h:auto"
+      sizes="100vw"
+      class="obj:cover w:full h:100%"
       fetchpriority="high"
     />
   </div>
@@ -611,16 +629,66 @@
       </div>
       <h2 id="movie" class="f:40px f:bold">{m.movie_heading()}</h2>
     </div>
-    <div class="w:1200px r:48px overflow:hidden b:16px|solid|#393939">
+    <div class="rel w:1200px r:48px overflow:hidden b:16px|solid|#393939">
       <iframe
+        bind:this={videoIframe}
         class="w:full video pointer-events:none"
-        src="https://www.youtube.com/embed/emxMcyfFROg?&autoplay=1&amp;mute=1&loop=1&playlist=emxMcyfFROg&preload=none&playsinline=1&rel=0&modestbranding=1&color=white&cc_load_policy=1"
+        src={`https://www.youtube.com/embed/${VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${VIDEO_ID}&preload=none&playsinline=1&rel=0&modestbranding=1&color=white&cc_load_policy=1&enablejsapi=1&controls=0&disablekb=1&iv_load_policy=3`}
         title="YouTube video player"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         referrerpolicy="strict-origin-when-cross-origin"
         allowfullscreen
       ></iframe>
+      <div class="abs bottom:20px right:20px z:1 flex flex:row gap:12px">
+        <button
+          type="button"
+          onclick={toggleVideoMute}
+          aria-label={videoMuted ? m.movie_unmute_aria() : m.movie_mute_aria()}
+          class="flex ai:center jc:center w:48px h:48px r:24px bg:#18A9BD fill:#fff>svg"
+        >
+          {#if videoMuted}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path d="M4 9v6h4l5 5V4L8 9H4Z" fill="white" />
+              <path
+                d="M18.5 8.5 15 12m0 0-3.5 3.5M15 12l-3.5-3.5M15 12l3.5 3.5"
+                stroke="white"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              />
+            </svg>
+          {:else}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+              <path d="M4 9v6h4l5 5V4L8 9H4Z" fill="white" />
+              <path
+                d="M16.5 9c1 1 1.5 2 1.5 3s-.5 2-1.5 3M18.8 6.7c1.8 1.6 2.7 3.4 2.7 5.3s-.9 3.7-2.7 5.3"
+                stroke="white"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                fill="none"
+              />
+            </svg>
+          {/if}
+        </button>
+        <a
+          href={`https://www.youtube.com/watch?v=${VIDEO_ID}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={m.movie_watch_aria()}
+          class="flex ai:center jc:center w:48px h:48px r:24px bg:#18A9BD fill:#fff>svg"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+            <path
+              d="M9 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3M13 4h7v7M20 4l-9 9"
+              stroke="white"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              fill="none"
+            />
+          </svg>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -682,6 +750,7 @@
             src={desc01}
             alt={m.howto1_alt()}
             class="w:100% h:auto"
+            loading="lazy"
           />
         </div>
       </div>
@@ -728,6 +797,7 @@
             src={desc02}
             alt={m.howto2_alt()}
             class="w:100% h:auto"
+            loading="lazy"
           />
         </div>
       </div>
@@ -774,6 +844,7 @@
             src={desc03}
             alt={m.howto3_alt()}
             class="w:100% h:auto"
+            loading="lazy"
           />
         </div>
       </div>

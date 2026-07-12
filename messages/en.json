@@ -21,6 +21,9 @@
   "about_p5": "a little more fun, a little more beautiful —\nturning everyday task management into a steady stream of accomplishment.",
 
   "movie_heading": "Movie",
+  "movie_mute_aria": "Mute the video",
+  "movie_unmute_aria": "Unmute the video",
+  "movie_watch_aria": "Watch the original video on YouTube (opens in a new tab)",
 
   "howto_heading": "How to Use",
   "howto_subheading": "How to use",
