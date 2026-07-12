@@ -5,6 +5,8 @@
   import Notch from "$lib/components/Notch.svelte";
   import Logo from "$lib/components/Logo.svelte";
   import pv from "$lib/assets/img/pv.png";
+  import pvOverlay from "$lib/assets/img/pv_overlay.png";
+  import pvTitle from "$lib/assets/img/pv_title.svg";
   import desc01 from "$lib/assets/img/desc_01.png";
   import desc02 from "$lib/assets/img/desc_02.png";
   import desc03 from "$lib/assets/img/desc_03.png";
@@ -347,16 +349,16 @@
     <Notch corner="bl" class="abs bottom:0 right:0 translateY(100%)" />
     <ul class="flex flex:row gap:40px">
       <li>
-        <a href={resolve("/")}>STACKS とは</a>
+        <a href={resolve("/#about")}>STACKS とは</a>
       </li>
       <li>
-        <a href={resolve("/")}>Movie</a>
+        <a href={resolve("/#movie")}>Movie</a>
       </li>
       <li>
-        <a href={resolve("/")}>使い方</a>
+        <a href={resolve("/#how")}>使い方</a>
       </li>
       <li>
-        <a href={resolve("/")}>ニュース</a>
+        <a href={resolve("/#news")}>ニュース</a>
       </li>
     </ul>
     <ul>
@@ -397,17 +399,122 @@
 </div>
 
 <main class="flex flex:column w:100% p:48px ai:center jc:center">
-  <div class="w:100% h:calc(100dvh-96px) flex">
-    <img src={pv} alt="pv" class="obj:cover w:100% r:48px" />
+  <div class="w:100% h:calc(100dvh-96px) flex rel r:48px overflow:hidden">
+    <div>
+      <Task color="red" r={0} size={200} class="abs top:-10px left:-160px" />
+      <Task color="red" r={-10} size={300} class="abs top:-30px left:190px" />
+      <Task color="red" r={2} size={200} class="abs top:-160px left:40px" />
+      <Task color="blue" r={-30} size={120} class="abs top:50px left:50px" />
+      <Task color="blue" r={-60} size={100} class="abs top:-60px left:460px" />
+      <Task color="blue" r={120} size={90} class="abs top:20px left:720px" />
+      <Task color="orange" r={20} size={140} class="abs top:50px left:500px" />
+      <Task
+        color="orange"
+        r={-40}
+        size={140}
+        class="abs top:-80px left:580px"
+      />
+    </div>
+    <div>
+      <Task
+        color="red"
+        r={-10}
+        size={300}
+        class="abs bottom:-170px right:430px"
+      />
+      <Task color="red" r={2} size={250} class="abs bottom:44px right:-44px" />
+      <Task
+        color="blue"
+        r={-30}
+        size={120}
+        class="abs bottom:300px right:-50px"
+      />
+      <Task
+        color="blue"
+        r={-60}
+        size={90}
+        class="abs bottom:-10px right:330px"
+      />
+      <Task
+        color="blue"
+        r={120}
+        size={90}
+        class="abs bottom:80px right:390px"
+      />
+      <Task
+        color="orange"
+        r={0}
+        size={200}
+        class="abs bottom:-160px right:-100px"
+      />
+      <Task
+        color="orange"
+        r={20}
+        size={140}
+        class="abs bottom:100px right:240px"
+      />
+      <Task
+        color="orange"
+        r={-40}
+        size={140}
+        class="abs bottom:-40px right:170px"
+      />
+    </div>
+    <div class="w:180px abs bottom:200px left:80px">
+      <Logo color="#fff" />
+    </div>
+    <img
+      src={pvTitle}
+      alt="pv title"
+      class="w:600px abs bottom:100px left:80px"
+    />
+    <img
+      src={pvOverlay}
+      alt="pv overlay"
+      class="obj:cover w:100% abs bottom:0 left:0 mix-blend-mode:overlay"
+    />
+    <img src={pv} alt="pv" class="obj:cover w:100%" />
   </div>
-  <div class="flex flex:column ai:center py:200px gap:80px">
-    <h2
-      class="f:32px fg:#393939 f:bold line-height:1.5 letter-spacing:.02em text-align:center"
-    >
-      タスク管理は、<br />もっと楽しくていい。
-    </h2>
+  <div class="flex flex:column ai:center py:200px rel">
+    <div>
+      <Task color="blue" r={10} size={60} class="abs top:170px left:-250px" />
+      <Task
+        color="orange"
+        r={-2}
+        size={100}
+        class="abs top:240px left:-170px"
+      />
+      <Task color="red" r={-30} size={150} class="abs top:400px left:-320px" />
+      <Task color="blue" r={60} size={60} class="abs top:680px left:-160px" />
+      <Task color="red" r={120} size={150} class="abs top:940px left:-250px" />
+    </div>
+    <div>
+      <Task color="red" r={-10} size={150} class="abs top:300px right:-250px" />
+      <Task color="blue" r={20} size={60} class="abs top:560px right:-340px" />
+      <Task
+        color="orange"
+        r={-30}
+        size={100}
+        class="abs top:800px right:-320px"
+      />
+      <Task color="blue" r={30} size={60} class="abs top:980px right:-160px" />
+      <Task
+        color="orange"
+        r={120}
+        size={100}
+        class="abs top:1100px right:-250px"
+      />
+    </div>
+    <div>
+      <h1 id="about" class="opacity:0 abs">STACKSとは</h1>
+      <h2
+        class="py:80px f:32px fg:#393939 f:bold line-height:1.5 letter-spacing:.02em text-align:center"
+      >
+        タスク管理は、<br />もっと楽しくていい。
+      </h2>
+    </div>
     <div
-      class="flex flex:column gap:40px f:16px color:#393939 line-height:2 text-align:center"
+      class="pb:80px flex flex:column gap:40px f:16px color:#393939 line-height:2 text-align:center"
     >
       <p>毎日繰り返すタスク管理。</p>
       <p>
@@ -424,13 +531,14 @@
       <Logo color="#333" />
     </div>
   </div>
+
   <div class="flex flex:column ai:center py:200px gap:80px">
     <div class="flex flex:row ai:center gap:10px">
       <div class="rel w:80px h:80px">
         <Task color="orange" r={-10} size={40} class="abs top:20px left:0" />
         <Task color="blue" r={10} size={25} class="abs top:0 left:40px" />
       </div>
-      <h class="f:40px f:bold">Movie</h>
+      <h1 id="movie" class="f:40px f:bold">Movie</h1>
     </div>
     <div class="w:1200px r:48px overflow:hidden b:16px|solid|#393939">
       <iframe
@@ -452,7 +560,7 @@
         <Task color="orange" r={-10} size={50} class="abs top:-25 left:64px" />
       </div>
       <div class="flex flex:column ai:center gap:10px">
-        <h1 class="f:40px fg:#393939 f:bold">使い方</h1>
+        <h1 id="how" class="f:40px fg:#393939 f:bold">使い方</h1>
         <span class="f:25px fg:#989492 f:semibold">How to use</span>
       </div>
       <div class="rel w:100px h:100px">
@@ -597,7 +705,7 @@
         <Task color="blue" r={20} size={20} class="abs top:-10 left:36px" />
       </div>
       <div class="flex flex:column ai:start gap:10px">
-        <h class="f:50px fg:#393939 f:bold">お知らせ</h>
+        <h1 id="news" class="f:50px fg:#393939 f:bold">お知らせ</h1>
         <span class="f:25px fg:#989492 f:semibold">News</span>
       </div>
       <div class="rel w:60px h:100px">
@@ -642,13 +750,13 @@
 
     <div class="rel z:1 flex flex:row gap:100px ai:end">
       <div class="w:200px">
-        <Logo color="#fff" />
+        <a href="/"><Logo color="#fff" /></a>
       </div>
       <span class="flex w:2px h:30px bg:#fff"></span>
       <div class="flex flex:row gap:20px">
         {#each links as link}
           <div>
-            {@html icon(link.label)}
+            <a href={link.link} target="_blank">{@html icon(link.label)}</a>
           </div>
         {/each}
       </div>
