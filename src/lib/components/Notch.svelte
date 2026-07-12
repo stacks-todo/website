@@ -43,6 +43,8 @@
   height={SIZE}
   viewBox={`0 0 ${SIZE} ${SIZE}`}
   style="overflow: visible"
+  aria-hidden="true"
+  focusable="false"
 >
   <path {d} fill="#fff" />
 </svg>

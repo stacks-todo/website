@@ -37,6 +37,8 @@
   height="197"
   viewBox="0 0 197 197"
   fill="none"
+  aria-hidden="true"
+  focusable="false"
   class="rotate({r}deg) w:{size}px h:{size}px {className}"
 >
   <path

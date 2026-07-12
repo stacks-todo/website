@@ -228,9 +228,35 @@
     }
   }
 
+  const ANCHOR_OFFSET = 160;
+
+  function scrollToAnchor(id: string, behavior: ScrollBehavior = "smooth") {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - ANCHOR_OFFSET;
+    window.scrollTo({ top, behavior });
+  }
+
+  function handleAnchorClick(e: MouseEvent, id: string) {
+    e.preventDefault();
+    scrollToAnchor(id);
+    history.pushState(null, "", `#${id}`);
+  }
+
+  function handleTopClick(e: MouseEvent) {
+    if (location.pathname !== resolve("/")) return;
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    history.pushState(null, "", location.pathname);
+  }
+
   onMount(() => {
     if (!footerEl) return;
     trySpawn();
+
+    if (location.hash) {
+      scrollToAnchor(location.hash.slice(1), "auto");
+    }
 
     const onScroll = () => {
       trySpawn();
@@ -312,13 +338,19 @@
     name: "STACKS",
     description: DESCRIPTION,
     url: BASE_URL,
-    brand: { "@type": "Brand", name: "STACKS" },
+    image: OG_IMAGE,
+    brand: {
+      "@type": "Brand",
+      name: "STACKS",
+      sameAs: links.map((l) => l.link),
+    },
   };
 </script>
 
 <svelte:head>
   <title>{TITLE}</title>
   <meta name="description" content={DESCRIPTION} />
+  <meta name="robots" content="index, follow" />
   <link rel="canonical" href={BASE_URL} />
 
   <meta property="og:type" content="website" />
@@ -349,16 +381,25 @@
     <Notch corner="bl" class="abs bottom:0 right:0 translateY(100%)" />
     <ul class="flex flex:row gap:40px">
       <li>
-        <a href={resolve("/#about")}>STACKS とは</a>
+        <a
+          href={resolve("/#about")}
+          onclick={(e) => handleAnchorClick(e, "about")}>STACKS とは</a
+        >
       </li>
       <li>
-        <a href={resolve("/#movie")}>Movie</a>
+        <a href={resolve("/#movie")} onclick={(e) => handleAnchorClick(e, "movie")}
+          >Movie</a
+        >
       </li>
       <li>
-        <a href={resolve("/#how")}>使い方</a>
+        <a href={resolve("/#how-to-use")} onclick={(e) => handleAnchorClick(e, "how-to-use")}
+          >使い方</a
+        >
       </li>
       <li>
-        <a href={resolve("/#news")}>ニュース</a>
+        <a href={resolve("/#news")} onclick={(e) => handleAnchorClick(e, "news")}
+          >ニュース</a
+        >
       </li>
     </ul>
     <ul>
@@ -373,7 +414,8 @@
             height="13"
             viewBox="0 0 13 13"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            focusable="false"
           >
             <path
               d="M11.608 0C12.0657 0.000213122 12.4361 0.370395 12.4362 0.828125V8.29004C12.4362 8.74793 12.0649 9.11912 11.6071 9.11914C11.1497 9.1188 10.7784 8.74836 10.778 8.29102V2.83008L1.41565 12.1934C1.09191 12.517 0.566575 12.517 0.242801 12.1934C-0.0809609 11.8696 -0.0809064 11.3443 0.242801 11.0205L9.60608 1.65723H4.14514C3.68777 1.65695 3.31652 1.28643 3.31604 0.829102C3.31604 0.371195 3.68821 -3.37175e-07 4.14612 0H11.608Z"
@@ -399,6 +441,7 @@
 </div>
 
 <main class="flex flex:column w:100% p:48px ai:center jc:center">
+  <h1 class="opacity:0 abs">{TITLE}</h1>
   <div class="w:100% h:calc(100dvh-96px) flex rel r:48px overflow:hidden">
     <div>
       <Task color="red" r={0} size={200} class="abs top:-10px left:-160px" />
@@ -465,17 +508,21 @@
     </div>
     <img
       src={pvTitle}
-      alt="pv title"
+      alt="忙しさを、美しく。"
       class="w:600px abs bottom:100px left:80px"
     />
     <img
       src={pvOverlay}
-      alt="pv overlay"
+      alt=""
       class="obj:cover w:100% abs bottom:0 left:0 mix-blend-mode:overlay"
     />
-    <img src={pv} alt="pv" class="obj:cover w:100%" />
+    <img
+      src={pv}
+      alt="回転する外枠とタスクボールでタスク量を表示するSTACKS本体"
+      class="obj:cover w:100%"
+    />
   </div>
-  <div class="flex flex:column ai:center py:200px rel">
+  <section class="flex flex:column ai:center py:200px rel" aria-labelledby="about">
     <div>
       <Task color="blue" r={10} size={60} class="abs top:170px left:-250px" />
       <Task
@@ -506,8 +553,8 @@
       />
     </div>
     <div>
-      <h1 id="about" class="opacity:0 abs">STACKSとは</h1>
       <h2
+        id="about"
         class="py:80px f:32px fg:#393939 f:bold line-height:1.5 letter-spacing:.02em text-align:center"
       >
         タスク管理は、<br />もっと楽しくていい。
@@ -530,15 +577,15 @@
     <div class="w:200px">
       <Logo color="#333" />
     </div>
-  </div>
+  </section>
 
-  <div class="flex flex:column ai:center py:200px gap:80px">
+  <section class="flex flex:column ai:center py:200px gap:80px" aria-labelledby="movie">
     <div class="flex flex:row ai:center gap:10px">
       <div class="rel w:80px h:80px">
         <Task color="orange" r={-10} size={40} class="abs top:20px left:0" />
         <Task color="blue" r={10} size={25} class="abs top:0 left:40px" />
       </div>
-      <h1 id="movie" class="f:40px f:bold">Movie</h1>
+      <h2 id="movie" class="f:40px f:bold">Movie</h2>
     </div>
     <div class="w:1200px r:48px overflow:hidden b:16px|solid|#393939">
       <iframe
@@ -551,16 +598,16 @@
         allowfullscreen
       ></iframe>
     </div>
-  </div>
+  </section>
 
-  <div class="flex flex:column ai:center py:200px gap:80px w:full">
+  <section class="flex flex:column ai:center py:200px gap:80px w:full" aria-labelledby="how-to-use">
     <div class="flex flex:row ai:center gap:60px">
       <div class="rel w:120px h:100px">
         <Task color="red" r={10} size={80} class="abs top:20px left:0" />
         <Task color="orange" r={-10} size={50} class="abs top:-25 left:64px" />
       </div>
       <div class="flex flex:column ai:center gap:10px">
-        <h1 id="how" class="f:40px fg:#393939 f:bold">使い方</h1>
+        <h2 id="how-to-use" class="f:40px fg:#393939 f:bold">使い方</h2>
         <span class="f:25px fg:#989492 f:semibold">How to use</span>
       </div>
       <div class="rel w:100px h:100px">
@@ -582,7 +629,8 @@
                 class="w:30px"
                 viewBox="0 0 21 21"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                focusable="false"
               >
                 <path
                   d="M2.9263 17.0919C6.83379 21.0077 13.1762 21.0143 17.0919 17.1068C21.0077 13.1993 21.0143 6.85685 17.1068 2.94113C13.1993 -0.9746 6.85685 -0.981193 2.94112 2.9263C-0.974603 6.83378 -0.98119 13.1762 2.9263 17.0919ZM5.09619 5.08658C7.63852 2.55135 11.7537 2.55503 14.2905 5.09551L5.08541 14.2793C2.55018 11.7369 2.55571 7.62341 5.09619 5.08658Z"
@@ -596,7 +644,7 @@
                 />
               </svg>
             </span>
-            <h2 class="f:30px f:bold fg:#fff">STACKSとは</h2>
+            <p class="f:30px f:bold fg:#fff">STACKSとは</p>
           </div>
           <h3 class="f:40px f:semibold fg:#fff mb:100px">
             タスク管理アプリと連携し、<br />残りのタスク量を可視化
@@ -607,7 +655,10 @@
           </p>
         </div>
         <div class="abs w:740px top:0 right:0 z:0">
-          <img src={desc01} alt="description" />
+          <img
+            src={desc01}
+            alt="タスク管理アプリと連携し、残りのタスク量を可視化するイメージ"
+          />
         </div>
       </div>
       <div
@@ -624,7 +675,8 @@
                 class="w:30px"
                 viewBox="0 0 21 21"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                focusable="false"                
               >
                 <path
                   d="M2.9263 17.0919C6.83379 21.0077 13.1762 21.0143 17.0919 17.1068C21.0077 13.1993 21.0143 6.85685 17.1068 2.94113C13.1993 -0.9746 6.85685 -0.981193 2.94112 2.9263C-0.974603 6.83378 -0.98119 13.1762 2.9263 17.0919ZM5.09619 5.08658C7.63852 2.55135 11.7537 2.55503 14.2905 5.09551L5.08541 14.2793C2.55018 11.7369 2.55571 7.62341 5.09619 5.08658Z"
@@ -638,7 +690,7 @@
                 />
               </svg>
             </span>
-            <h2 class="f:30px f:bold fg:#fff">STACKSとは</h2>
+            <p class="f:30px f:bold fg:#fff">STACKSとは</p>
           </div>
           <h3 class="f:40px f:semibold fg:#fff mb:100px">
             アプリの内容が本体の<br />ディスプレイに同期される
@@ -649,7 +701,10 @@
           </p>
         </div>
         <div class="abs w:800px top:0 right:-20px z:0">
-          <img src={desc02} alt="description" />
+          <img
+            src={desc02}
+            alt="アプリの内容が本体のディスプレイに同期されるイメージ"
+          />
         </div>
       </div>
       <div
@@ -666,7 +721,8 @@
                 class="w:30px"
                 viewBox="0 0 21 21"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                focusable="false"
               >
                 <path
                   d="M2.9263 17.0919C6.83379 21.0077 13.1762 21.0143 17.0919 17.1068C21.0077 13.1993 21.0143 6.85685 17.1068 2.94113C13.1993 -0.9746 6.85685 -0.981193 2.94112 2.9263C-0.974603 6.83378 -0.98119 13.1762 2.9263 17.0919ZM5.09619 5.08658C7.63852 2.55135 11.7537 2.55503 14.2905 5.09551L5.08541 14.2793C2.55018 11.7369 2.55571 7.62341 5.09619 5.08658Z"
@@ -680,7 +736,7 @@
                 />
               </svg>
             </span>
-            <h2 class="f:30px f:bold fg:#fff">STACKSとは</h2>
+            <p class="f:30px f:bold fg:#fff">STACKSとは</p>
           </div>
           <h3 class="f:40px f:semibold fg:#fff mb:100px">
             本体のディスプレイから<br />タスクの確認、完了を行う
@@ -691,13 +747,16 @@
           </p>
         </div>
         <div class="abs w:740px top:0 right:0 z:0">
-          <img src={desc03} alt="description" />
+          <img
+            src={desc03}
+            alt="本体のディスプレイからタスクの確認、完了を行うイメージ"
+          />
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="flex flex:row ai:start jc:center gap:100px py:200px w:full">
+  <section class="flex flex:row ai:start jc:center gap:100px py:200px w:full" aria-labelledby="news">
     <div class="flex flex:row ai:center gap:20px">
       <div class="rel w:120px h:100px">
         <Task color="red" r={10} size={70} class="abs top:60px left:0" />
@@ -705,7 +764,7 @@
         <Task color="blue" r={20} size={20} class="abs top:-10 left:36px" />
       </div>
       <div class="flex flex:column ai:start gap:10px">
-        <h1 id="news" class="f:50px fg:#393939 f:bold">お知らせ</h1>
+        <h2 id="news" class="f:50px fg:#393939 f:bold">お知らせ</h2>
         <span class="f:25px fg:#989492 f:semibold">News</span>
       </div>
       <div class="rel w:60px h:100px">
@@ -713,17 +772,21 @@
         <Task color="blue" r={10} size={20} class="abs top:-80px left:-20px" />
       </div>
     </div>
-    <div class="flex flex:column w:900px gap:40px">
+    <ul class="flex flex:column w:900px gap:40px list-style:none" aria-labelledby="news">
       {#each newsItems as item}
-        <div class="grid grid-template-columns:100px|100px|1fr gap:80px">
-          <p class="f:19px fg:#393939">{item.date}</p>
-          <span class="f:20px f:medium fg:#989492 w:100px">{item.tag}</span>
-          <p class="f:20px f:medium fg:#393939">{item.title}</p>
-        </div>
-        <span class="w:full bb:1px|solid|#E6E2E0"></span>
+        <li class="flex flex:column gap:40px">
+          <div class="grid grid-template-columns:100px|100px|1fr gap:80px">
+            <time class="f:19px fg:#393939" datetime={item.date.replaceAll(".", "-")}
+              >{item.date}</time
+            >
+            <span class="f:20px f:medium fg:#989492 w:100px">{item.tag}</span>
+            <p class="f:20px f:medium fg:#393939">{item.title}</p>
+          </div>
+          <span class="w:full bb:1px|solid|#E6E2E0"></span>
+        </li>
       {/each}
-    </div>
-  </div>
+    </ul>
+  </section>
 
   <footer
     bind:this={footerEl}
@@ -750,13 +813,21 @@
 
     <div class="rel z:1 flex flex:row gap:100px ai:end">
       <div class="w:200px">
-        <a href="/"><Logo color="#fff" /></a>
+        <a href={resolve("/")} onclick={handleTopClick} aria-label="STACKS ページ上部へ戻る"
+          ><Logo color="#fff" /></a
+        >
       </div>
       <span class="flex w:2px h:30px bg:#fff"></span>
       <div class="flex flex:row gap:20px">
         {#each links as link}
           <div>
-            <a href={link.link} target="_blank">{@html icon(link.label)}</a>
+            <a
+              href={link.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`STACKS 公式${link.label}（新しいタブで開く）`}
+              >{@html icon(link.label)}</a
+            >
           </div>
         {/each}
       </div>
