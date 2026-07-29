@@ -48,6 +48,9 @@
     { color: "blue", size: 120, rot: 15, leftFrac: 0.3, bottom: 60 },
   ];
 
+  const MOBILE_WIDTH = 834;
+  const BALL_SCALE_WIDTH = 900;
+  const BALL_SCALE_MIN = 0.34;
   const GRAVITY = 0.5;
   const FRICTION = 0.985;
   const RESTITUTION = 0.15;
@@ -67,6 +70,7 @@
   let rafId: number | undefined;
   let idleFrames = 0;
   let spawned = false;
+  let menuOpen = $state(false);
 
   function isNearBottom(): boolean {
     if (!footerEl) return false;
@@ -80,9 +84,14 @@
     return r.top > window.innerHeight * 0.9;
   }
 
+  function ballScale(width: number): number {
+    return Math.max(BALL_SCALE_MIN, Math.min(1, width / BALL_SCALE_WIDTH));
+  }
+
   function spawnBalls(width: number, height: number) {
+    const scale = ballScale(width);
     balls = initialBalls.map((b, i) => {
-      const r = b.size / 2;
+      const r = (b.size * scale) / 2;
       return {
         color: b.color,
         r,
@@ -170,12 +179,13 @@
   }
 
   function burst(cx: number, cy: number) {
+    const radius = BURST_RADIUS * ballScale(footerEl?.clientWidth ?? BALL_SCALE_WIDTH);
     for (const b of balls) {
       const dx = b.x - cx;
       const dy = b.y - cy;
       const dist = Math.hypot(dx, dy) || 1;
-      if (dist < BURST_RADIUS) {
-        const power = BURST_POWER * (1 - dist / BURST_RADIUS);
+      if (dist < radius) {
+        const power = BURST_POWER * (1 - dist / radius);
         b.vx += (dx / dist) * power;
         b.vy += (dy / dist) * power - power * 0.4;
       }
@@ -251,18 +261,39 @@
   }
 
   const ANCHOR_OFFSET = 160;
+  const ANCHOR_OFFSET_MOBILE = 96;
+
+  const navItems = [
+    { id: "about", label: () => m.nav_about() },
+    { id: "movie", label: () => m.nav_movie() },
+    { id: "how-to-use", label: () => m.nav_how_to_use() },
+    { id: "news", label: () => m.nav_news() },
+  ];
+
+  function anchorOffset(): number {
+    return window.innerWidth < MOBILE_WIDTH ? ANCHOR_OFFSET_MOBILE : ANCHOR_OFFSET;
+  }
 
   function scrollToAnchor(id: string, behavior: ScrollBehavior = "smooth") {
     const el = document.getElementById(id);
     if (!el) return;
-    const top = el.getBoundingClientRect().top + window.scrollY - ANCHOR_OFFSET;
+    const top = el.getBoundingClientRect().top + window.scrollY - anchorOffset();
     window.scrollTo({ top, behavior });
   }
 
   function handleAnchorClick(e: MouseEvent, id: string) {
     e.preventDefault();
+    menuOpen = false;
     scrollToAnchor(id);
     history.pushState(null, "", `#${id}`);
+  }
+
+  function handleWindowKeydown(e: KeyboardEvent) {
+    if (e.key === "Escape") menuOpen = false;
+  }
+
+  function handleWindowResize() {
+    if (window.innerWidth >= MOBILE_WIDTH) menuOpen = false;
   }
 
   function handleTopClick(e: MouseEvent) {
@@ -370,6 +401,8 @@
   };
 </script>
 
+<svelte:window onkeydown={handleWindowKeydown} onresize={handleWindowResize} />
+
 <svelte:head>
   <title>{TITLE}</title>
   <meta name="description" content={DESCRIPTION} />
@@ -399,36 +432,36 @@
   {@html `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`}
 </svelte:head>
 
-<header class="fixed top:48px right:48px w:fit h:94px bg:#fff rbl:40px z:999">
+{#if menuOpen}
+  <button
+    type="button"
+    aria-label={m.nav_menu_close_aria()}
+    onclick={() => (menuOpen = false)}
+    class="fixed inset:0 z:998 bg:transparent b:none hidden@sm"
+  ></button>
+{/if}
+
+<header
+  class="fixed top:48px right:48px top:20px@<sm right:20px@<sm w:fit h:94px h:auto@<sm bg:#fff rbl:40px rbl:24px@<sm z:999 ~width|.45s|cubic-bezier(.22,1,.36,1) {menuOpen
+    ? 'w:240px@<sm'
+    : 'w:64px@<sm'}"
+>
+  <Notch corner="bl" class="abs top:0 left:0 translateX(-100%) w:20px@<sm h:20px@<sm" />
+  <Notch corner="bl" class="abs bottom:0 right:0 translateY(100%) w:20px@<sm h:20px@<sm" />
   <nav
-    class="rel w:full h:full flex flex:row list-style:none ai:center jc:end pb:20px pl:60px gap:44px f:18px_li f:semibold_li fg:#393939_li"
+    class="rel w:full h:full h:64px@<sm flex flex:row list-style:none ai:center jc:end pb:20px pb:0@<sm pl:60px pl:0@<sm gap:44px f:18px_li f:semibold_li fg:#393939_li"
   >
-    <Notch corner="bl" class="abs top:0 left:0 translateX(-100%)" />
-    <Notch corner="bl" class="abs bottom:0 right:0 translateY(100%)" />
-    <ul class="flex flex:row gap:40px">
-      <li>
-        <a
-          href={localizeHref(resolve("/#about"))}
-          onclick={(e) => handleAnchorClick(e, "about")}>{m.nav_about()}</a
-        >
-      </li>
-      <li>
-        <a href={localizeHref(resolve("/#movie"))} onclick={(e) => handleAnchorClick(e, "movie")}
-          >{m.nav_movie()}</a
-        >
-      </li>
-      <li>
-        <a href={localizeHref(resolve("/#how-to-use"))} onclick={(e) => handleAnchorClick(e, "how-to-use")}
-          >{m.nav_how_to_use()}</a
-        >
-      </li>
-      <li>
-        <a href={localizeHref(resolve("/#news"))} onclick={(e) => handleAnchorClick(e, "news")}
-          >{m.nav_news()}</a
-        >
-      </li>
+    <ul class="flex flex:row gap:40px hidden@<sm">
+      {#each navItems as item}
+        <li>
+          <a
+            href={localizeHref(`${resolve("/")}#${item.id}`)}
+            onclick={(e) => handleAnchorClick(e, item.id)}>{item.label()}</a
+          >
+        </li>
+      {/each}
     </ul>
-    <ul class="flex flex:row gap:16px ai:center">
+    <ul class="flex flex:row gap:16px ai:center hidden@<sm">
       <li>
         <ul class="flex flex:row gap:8px f:14px" aria-label={m.lang_switch_aria()}>
           {#each locales as l}
@@ -464,26 +497,106 @@
         </a>
       </li>
     </ul>
+    <button
+      type="button"
+      onclick={() => (menuOpen = !menuOpen)}
+      aria-expanded={menuOpen}
+      aria-controls="mobile-menu"
+      aria-label={menuOpen ? m.nav_menu_close_aria() : m.nav_menu_open_aria()}
+      class="flex flex:column ai:center jc:center gap:5px w:64px h:64px hidden@sm"
+    >
+      <span
+        class="block w:20px h:2px r:1px bg:#393939 ~transform|.3s|cubic-bezier(.22,1,.36,1)"
+        style:transform={menuOpen ? "translateY(7px) rotate(45deg)" : "none"}
+      ></span>
+      <span
+        class="block w:20px h:2px r:1px bg:#393939 ~opacity|.2s"
+        style:opacity={menuOpen ? 0 : 1}
+      ></span>
+      <span
+        class="block w:20px h:2px r:1px bg:#393939 ~transform|.3s|cubic-bezier(.22,1,.36,1)"
+        style:transform={menuOpen ? "translateY(-7px) rotate(-45deg)" : "none"}
+      ></span>
+    </button>
   </nav>
+  <div
+    id="mobile-menu"
+    inert={!menuOpen}
+    class="grid hidden@sm ~grid-template-rows|.45s|cubic-bezier(.22,1,.36,1) {menuOpen
+      ? 'grid-template-rows:1fr'
+      : 'grid-template-rows:0fr'}"
+  >
+    <div class="overflow:hidden">
+      <div
+        class="flex flex:column gap:18px px:20px pb:24px ~opacity|.3s {menuOpen
+          ? 'opacity:1'
+          : 'opacity:0'}"
+      >
+        <ul class="flex flex:column gap:16px list-style:none f:16px_li f:semibold_li fg:#393939_li">
+          {#each navItems as item}
+            <li>
+              <a
+                href={localizeHref(`${resolve("/")}#${item.id}`)}
+                onclick={(e) => handleAnchorClick(e, item.id)}>{item.label()}</a
+              >
+            </li>
+          {/each}
+        </ul>
+        <span class="w:full bb:1px|solid|#E6E2E0"></span>
+        <div class="flex flex:row ai:center jc:space-between gap:12px">
+          <ul class="flex flex:row gap:10px f:15px f:semibold" aria-label={m.lang_switch_aria()}>
+            {#each locales as l}
+              <li>
+                <button
+                  type="button"
+                  onclick={() => setLocale(l)}
+                  aria-current={getLocale() === l ? "true" : undefined}
+                  class="fg:#393939 opacity:{getLocale() === l ? '1' : '.4'}"
+                >{l.toUpperCase()}</button>
+              </li>
+            {/each}
+          </ul>
+          <a
+            href={localizeHref(resolve("/"))}
+            class="flex flex:row ai:center jc:center h:40px r:20px p:6px|18px f:14px gap:8px bg:#18A9BD fg:#fff fill:#fff>svg>path"
+          >
+            <span>{m.nav_buy()}</span>
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 13 13"
+              fill="none"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M11.608 0C12.0657 0.000213122 12.4361 0.370395 12.4362 0.828125V8.29004C12.4362 8.74793 12.0649 9.11912 11.6071 9.11914C11.1497 9.1188 10.7784 8.74836 10.778 8.29102V2.83008L1.41565 12.1934C1.09191 12.517 0.566575 12.517 0.242801 12.1934C-0.0809609 11.8696 -0.0809064 11.3443 0.242801 11.0205L9.60608 1.65723H4.14514C3.68777 1.65695 3.31652 1.28643 3.31604 0.829102C3.31604 0.371195 3.68821 -3.37175e-07 4.14612 0H11.608Z"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
 
 <div class="fixed top:0 left:0 w:100% h:100dvh flex pointer-events:none z:999">
   <div class="w:full h:full rel">
-    <span class="abs top:0 left:0 w:100% h:48px bg:#fff">
-      <Notch corner="br" class="abs bottom:0 left:48px translateY(100%)" />
+    <span class="abs top:0 left:0 w:100% h:48px h:20px@<sm bg:#fff">
+      <Notch corner="br" class="abs bottom:0 left:48px left:20px@<sm translateY(100%) w:20px@<sm h:20px@<sm" />
     </span>
 
-    <span class="abs bottom:0 left:0 w:100% h:48px bg:#fff">
-      <Notch corner="tr" class="abs top:0 left:48px translateY(-100%)" />
-      <Notch corner="tl" class="abs top:0 right:48px translateY(-100%)" />
+    <span class="abs bottom:0 left:0 w:100% h:48px h:20px@<sm bg:#fff">
+      <Notch corner="tr" class="abs top:0 left:48px left:20px@<sm translateY(-100%) w:20px@<sm h:20px@<sm" />
+      <Notch corner="tl" class="abs top:0 right:48px right:20px@<sm translateY(-100%) w:20px@<sm h:20px@<sm" />
     </span>
   </div>
 </div>
 
-<main class="flex flex:column w:100% p:48px ai:center jc:center">
+<main class="flex flex:column w:100% p:48px p:20px@<sm ai:center jc:center">
   <h1 class="opacity:0 abs">{TITLE}</h1>
-  <div class="w:100% h:calc(100dvh-96px) flex rel r:48px overflow:hidden">
-    <div>
+  <div class="w:100% h:calc(100dvh-96px) h:calc(100dvh-40px)@<sm flex rel r:48px r:24px@<sm overflow:hidden">
+    <div class="abs inset:0 pointer-events:none transform-origin:left|top scale(.5)@<sm">
       <Task color="red" r={0} size={200} class="abs top:-10px left:-160px" />
       <Task color="red" r={-10} size={300} class="abs top:-30px left:190px" />
       <Task color="red" r={2} size={200} class="abs top:-160px left:40px" />
@@ -498,7 +611,7 @@
         class="abs top:-80px left:580px"
       />
     </div>
-    <div>
+    <div class="abs inset:0 pointer-events:none transform-origin:right|bottom scale(.5)@<sm">
       <Task
         color="red"
         r={-10}
@@ -543,13 +656,13 @@
         class="abs bottom:-40px right:170px"
       />
     </div>
-    <div class="w:180px abs bottom:200px left:80px">
+    <div class="w:180px w:110px@<sm abs bottom:200px bottom:110px@<sm left:80px left:24px@<sm">
       <Logo color="#fff" />
     </div>
     <img
       src={pvTitle}
       alt={m.hero_pv_title_alt()}
-      class="w:600px abs bottom:100px left:80px"
+      class="w:600px w:calc(100%-48px)@<sm abs bottom:100px bottom:48px@<sm left:80px left:24px@<sm"
     />
     <enhanced:img
       src={pvOverlay}
@@ -561,12 +674,12 @@
       src={pv}
       alt={m.hero_pv_alt()}
       sizes="100vw"
-      class="obj:cover w:full h:100%"
+      class="obj:cover object-position:70%|50%@<sm w:full h:100%"
       fetchpriority="high"
     />
   </div>
-  <section class="flex flex:column ai:center py:200px rel" aria-labelledby="about">
-    <div>
+  <section class="flex flex:column ai:center py:200px py:100px@<sm w:full@<sm rel" aria-labelledby="about">
+    <div class="hidden@<lg">
       <Task color="blue" r={10} size={60} class="abs top:170px left:-250px" />
       <Task
         color="orange"
@@ -578,7 +691,7 @@
       <Task color="blue" r={60} size={60} class="abs top:680px left:-160px" />
       <Task color="red" r={120} size={150} class="abs top:940px left:-250px" />
     </div>
-    <div>
+    <div class="hidden@<lg">
       <Task color="red" r={-10} size={150} class="abs top:300px right:-250px" />
       <Task color="blue" r={20} size={60} class="abs top:560px right:-340px" />
       <Task
@@ -598,13 +711,13 @@
     <div>
       <h2
         id="about"
-        class="py:80px f:32px fg:#393939 f:bold line-height:1.5 letter-spacing:.02em text-align:center"
+        class="py:80px py:40px@<sm f:32px f:24px@<sm fg:#393939 f:bold line-height:1.5 letter-spacing:.02em text-align:center"
       >
         {#each lines(m.about_heading()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
       </h2>
     </div>
     <div
-      class="pb:80px flex flex:column gap:40px f:16px color:#393939 line-height:2 text-align:center"
+      class="pb:80px pb:40px@<sm flex flex:column gap:40px gap:24px@<sm w:full@<sm max-w:640px f:16px f:14px@<sm color:#393939 line-height:2 text-align:center"
     >
       <p>{m.about_p1()}</p>
       <p>
@@ -616,20 +729,20 @@
         {#each lines(m.about_p5()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
       </p>
     </div>
-    <div class="w:200px">
+    <div class="w:200px w:140px@<sm">
       <Logo color="#333" />
     </div>
   </section>
 
-  <section class="flex flex:column ai:center py:200px gap:80px" aria-labelledby="movie">
+  <section class="flex flex:column ai:center py:200px py:100px@<sm gap:80px gap:40px@<sm w:full" aria-labelledby="movie">
     <div class="flex flex:row ai:center gap:10px">
       <div class="rel w:80px h:80px">
         <Task color="orange" r={-10} size={40} class="abs top:20px left:0" />
         <Task color="blue" r={10} size={25} class="abs top:0 left:40px" />
       </div>
-      <h2 id="movie" class="f:40px f:bold">{m.movie_heading()}</h2>
+      <h2 id="movie" class="f:40px f:28px@<sm f:bold">{m.movie_heading()}</h2>
     </div>
-    <div class="rel w:1200px r:48px overflow:hidden b:16px|solid|#393939">
+    <div class="rel w:full max-w:1200px r:48px r:24px@<sm overflow:hidden b:16px|solid|#393939 b:8px|solid|#393939@<sm">
       <iframe
         bind:this={videoIframe}
         class="w:full video pointer-events:none"
@@ -640,12 +753,12 @@
         referrerpolicy="strict-origin-when-cross-origin"
         allowfullscreen
       ></iframe>
-      <div class="abs bottom:20px right:20px z:1 flex flex:row gap:12px">
+      <div class="abs bottom:20px bottom:12px@<sm right:20px right:12px@<sm z:1 flex flex:row gap:12px gap:8px@<sm">
         <button
           type="button"
           onclick={toggleVideoMute}
           aria-label={videoMuted ? m.movie_unmute_aria() : m.movie_mute_aria()}
-          class="flex ai:center jc:center w:48px h:48px r:24px bg:#18A9BD fill:#fff>svg"
+          class="flex ai:center jc:center w:48px w:40px@<sm h:48px h:40px@<sm r:24px r:20px@<sm bg:#18A9BD fill:#fff>svg"
         >
           {#if videoMuted}
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
@@ -675,7 +788,7 @@
           target="_blank"
           rel="noopener noreferrer"
           aria-label={m.movie_watch_aria()}
-          class="flex ai:center jc:center w:48px h:48px r:24px bg:#18A9BD fill:#fff>svg"
+          class="flex ai:center jc:center w:48px w:40px@<sm h:48px h:40px@<sm r:24px r:20px@<sm bg:#18A9BD fill:#fff>svg"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
             <path
@@ -692,31 +805,31 @@
     </div>
   </section>
 
-  <section class="flex flex:column ai:center py:200px gap:80px w:full" aria-labelledby="how-to-use">
-    <div class="flex flex:row ai:center gap:60px">
-      <div class="rel w:120px h:100px">
+  <section class="flex flex:column ai:center py:200px py:100px@<sm gap:80px gap:40px@<sm w:full" aria-labelledby="how-to-use">
+    <div class="flex flex:row flex:column@<sm ai:center gap:60px gap:16px@<sm">
+      <div class="rel w:120px h:100px hidden@<sm">
         <Task color="red" r={10} size={80} class="abs top:20px left:0" />
         <Task color="orange" r={-10} size={50} class="abs top:-25 left:64px" />
       </div>
       <div class="flex flex:column ai:center gap:10px">
-        <h2 id="how-to-use" class="f:40px fg:#393939 f:bold">{m.howto_heading()}</h2>
-        <span class="f:25px fg:#989492 f:semibold">{m.howto_subheading()}</span>
+        <h2 id="how-to-use" class="f:40px f:28px@<sm fg:#393939 f:bold">{m.howto_heading()}</h2>
+        <span class="f:25px f:18px@<sm fg:#989492 f:semibold">{m.howto_subheading()}</span>
       </div>
-      <div class="rel w:100px h:100px">
+      <div class="rel w:100px h:100px hidden@<sm">
         <Task color="blue" r={10} size={30} class="abs top:20px left:0" />
       </div>
     </div>
-    <div class="w:full flex flex:column gap:20px">
+    <div class="w:full flex flex:column gap:20px gap:16px@<sm">
       <div
-        class="bg:#3F9BD6 rel w:full h:600px r:48px pl:200px flex ai:center overflow:hidden"
+        class="bg:#3F9BD6 rel w:full h:600px h:auto@<sm r:48px r:24px@<sm pl:200px pl:120px@<lg p:32px|24px@<sm flex flex:column@<sm ai:center ai:start@<sm gap:24px@<sm overflow:hidden"
       >
         <span
-          class="abs top:-100px left:-80px f:600px f:bold line-h:600px fg:#CFCFD8 opacity:.1 z:0"
+          class="abs top:-100px top:-40px@<sm left:-80px left:-20px@<sm f:600px f:240px@<sm f:bold line-h:600px line-h:240px@<sm fg:#CFCFD8 opacity:.1 z:0"
           >01</span
         >
         <div class="flex flex:column z:1">
-          <div class="rel mb:40px">
-            <span class="abs top:50% left:-40px translateY(-50%)">
+          <div class="rel flex@<sm ai:center@<sm gap:10px@<sm mb:40px mb:20px@<sm">
+            <span class="abs rel@<sm top:50% top:auto@<sm left:-40px left:auto@<sm translateY(-50%) translateY(0)@<sm">
               <svg
                 class="w:30px"
                 viewBox="0 0 21 21"
@@ -736,16 +849,16 @@
                 />
               </svg>
             </span>
-            <p class="f:30px f:bold fg:#fff">{m.howto_label()}</p>
+            <p class="f:30px f:20px@<sm f:bold fg:#fff">{m.howto_label()}</p>
           </div>
-          <h3 class="f:40px f:semibold fg:#fff mb:100px">
+          <h3 class="f:40px f:28px@<lg f:20px@<sm f:17px@<4xs f:semibold fg:#fff mb:100px mb:24px@<sm">
             {#each lines(m.howto1_title()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
           </h3>
-          <p class="fg:#fff">
+          <p class="fg:#fff f:14px@<sm">
             {#each lines(m.howto1_body()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
           </p>
         </div>
-        <div class="abs w:740px top:0 right:0 z:0">
+        <div class="abs static@<sm w:740px w:45%@<lg w:full@<sm top:0 right:0 z:0">
           <enhanced:img
             src={desc01}
             alt={m.howto1_alt()}
@@ -755,62 +868,15 @@
         </div>
       </div>
       <div
-        class="bg:#DE6E29 rel w:full h:600px r:48px pl:200px flex ai:center overflow:hidden"
+        class="bg:#DE6E29 rel w:full h:600px h:auto@<sm r:48px r:24px@<sm pl:200px pl:120px@<lg p:32px|24px@<sm flex flex:column@<sm ai:center ai:start@<sm gap:24px@<sm overflow:hidden"
       >
         <span
-          class="abs top:-100px left:-80px f:600px f:bold line-h:600px fg:#CFCFD8 opacity:.1 z:0"
+          class="abs top:-100px top:-40px@<sm left:-80px left:-20px@<sm f:600px f:240px@<sm f:bold line-h:600px line-h:240px@<sm fg:#CFCFD8 opacity:.1 z:0"
           >02</span
         >
         <div class="flex flex:column z:1">
-          <div class="rel mb:40px">
-            <span class="abs top:50% left:-40px translateY(-50%)">
-              <svg
-                class="w:30px"
-                viewBox="0 0 21 21"
-                fill="none"
-                aria-hidden="true"
-                focusable="false"                
-              >
-                <path
-                  d="M2.9263 17.0919C6.83379 21.0077 13.1762 21.0143 17.0919 17.1068C21.0077 13.1993 21.0143 6.85685 17.1068 2.94113C13.1993 -0.9746 6.85685 -0.981193 2.94112 2.9263C-0.974603 6.83378 -0.98119 13.1762 2.9263 17.0919ZM5.09619 5.08658C7.63852 2.55135 11.7537 2.55503 14.2905 5.09551L5.08541 14.2793C2.55018 11.7369 2.55571 7.62341 5.09619 5.08658Z"
-                  fill="white"
-                />
-                <path
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
-                  d="M14.2905 5.09551C11.7537 2.55503 7.63852 2.55135 5.09619 5.08658C2.55571 7.62341 2.55018 11.7369 5.08541 14.2793L14.2905 5.09551Z"
-                  fill="#D9D9D9"
-                />
-              </svg>
-            </span>
-            <p class="f:30px f:bold fg:#fff">{m.howto_label()}</p>
-          </div>
-          <h3 class="f:40px f:semibold fg:#fff mb:100px">
-            {#each lines(m.howto2_title()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
-          </h3>
-          <p class="fg:#fff">
-            {#each lines(m.howto2_body()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
-          </p>
-        </div>
-        <div class="abs w:800px top:-20px right:-20px z:0">
-          <enhanced:img
-            src={desc02}
-            alt={m.howto2_alt()}
-            class="w:100% h:auto"
-            loading="lazy"
-          />
-        </div>
-      </div>
-      <div
-        class="bg:#DF4242 rel w:full h:600px r:48px pl:200px flex ai:center overflow:hidden"
-      >
-        <span
-          class="abs top:-100px left:-80px f:600px f:bold line-h:600px fg:#CFCFD8 opacity:.1 z:0"
-          >03</span
-        >
-        <div class="flex flex:column z:1">
-          <div class="rel mb:40px">
-            <span class="abs top:50% left:-40px translateY(-50%)">
+          <div class="rel flex@<sm ai:center@<sm gap:10px@<sm mb:40px mb:20px@<sm">
+            <span class="abs rel@<sm top:50% top:auto@<sm left:-40px left:auto@<sm translateY(-50%) translateY(0)@<sm">
               <svg
                 class="w:30px"
                 viewBox="0 0 21 21"
@@ -830,16 +896,63 @@
                 />
               </svg>
             </span>
-            <p class="f:30px f:bold fg:#fff">{m.howto_label()}</p>
+            <p class="f:30px f:20px@<sm f:bold fg:#fff">{m.howto_label()}</p>
           </div>
-          <h3 class="f:40px f:semibold fg:#fff mb:100px">
+          <h3 class="f:40px f:28px@<lg f:20px@<sm f:17px@<4xs f:semibold fg:#fff mb:100px mb:24px@<sm">
+            {#each lines(m.howto2_title()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
+          </h3>
+          <p class="fg:#fff f:14px@<sm">
+            {#each lines(m.howto2_body()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
+          </p>
+        </div>
+        <div class="abs static@<sm w:800px w:48%@<lg w:full@<sm top:-20px right:-20px z:0">
+          <enhanced:img
+            src={desc02}
+            alt={m.howto2_alt()}
+            class="w:100% h:auto"
+            loading="lazy"
+          />
+        </div>
+      </div>
+      <div
+        class="bg:#DF4242 rel w:full h:600px h:auto@<sm r:48px r:24px@<sm pl:200px pl:120px@<lg p:32px|24px@<sm flex flex:column@<sm ai:center ai:start@<sm gap:24px@<sm overflow:hidden"
+      >
+        <span
+          class="abs top:-100px top:-40px@<sm left:-80px left:-20px@<sm f:600px f:240px@<sm f:bold line-h:600px line-h:240px@<sm fg:#CFCFD8 opacity:.1 z:0"
+          >03</span
+        >
+        <div class="flex flex:column z:1">
+          <div class="rel flex@<sm ai:center@<sm gap:10px@<sm mb:40px mb:20px@<sm">
+            <span class="abs rel@<sm top:50% top:auto@<sm left:-40px left:auto@<sm translateY(-50%) translateY(0)@<sm">
+              <svg
+                class="w:30px"
+                viewBox="0 0 21 21"
+                fill="none"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  d="M2.9263 17.0919C6.83379 21.0077 13.1762 21.0143 17.0919 17.1068C21.0077 13.1993 21.0143 6.85685 17.1068 2.94113C13.1993 -0.9746 6.85685 -0.981193 2.94112 2.9263C-0.974603 6.83378 -0.98119 13.1762 2.9263 17.0919ZM5.09619 5.08658C7.63852 2.55135 11.7537 2.55503 14.2905 5.09551L5.08541 14.2793C2.55018 11.7369 2.55571 7.62341 5.09619 5.08658Z"
+                  fill="white"
+                />
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M14.2905 5.09551C11.7537 2.55503 7.63852 2.55135 5.09619 5.08658C2.55571 7.62341 2.55018 11.7369 5.08541 14.2793L14.2905 5.09551Z"
+                  fill="#D9D9D9"
+                />
+              </svg>
+            </span>
+            <p class="f:30px f:20px@<sm f:bold fg:#fff">{m.howto_label()}</p>
+          </div>
+          <h3 class="f:40px f:28px@<lg f:20px@<sm f:17px@<4xs f:semibold fg:#fff mb:100px mb:24px@<sm">
             {#each lines(m.howto3_title()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
           </h3>
-          <p class="fg:#fff">
+          <p class="fg:#fff f:14px@<sm">
             {#each lines(m.howto3_body()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
           </p>
         </div>
-        <div class="abs w:740px top:-20px right:0 z:0">
+        <div class="abs static@<sm w:740px w:45%@<lg w:full@<sm top:-20px right:0 z:0">
           <enhanced:img
             src={desc03}
             alt={m.howto3_alt()}
@@ -851,31 +964,31 @@
     </div>
   </section>
 
-  <section class="flex flex:row ai:start jc:center gap:100px py:200px w:full" aria-labelledby="news">
-    <div class="flex flex:row ai:center gap:20px">
-      <div class="rel w:120px h:100px">
-        <Task color="red" r={10} size={70} class="abs top:60px left:0" />
-        <Task color="orange" r={-10} size={40} class="abs top:18 left:60px" />
-        <Task color="blue" r={20} size={20} class="abs top:-10 left:36px" />
+  <section class="flex flex:row flex:column@<lg ai:start ai:center@<lg jc:center gap:100px gap:120px@<lg gap:60px@<sm py:200px py:100px@<sm w:full" aria-labelledby="news">
+    <div class="flex flex:row ai:center gap:20px gap:12px@<sm">
+      <div class="rel w:120px h:100px w:80px@<sm">
+        <Task color="red" r={10} size={70} class="abs top:60px left:0 top:50px@<sm scale(.8)@<sm" />
+        <Task color="orange" r={-10} size={40} class="abs top:18 left:60px left:50px@<sm scale(.8)@<sm" />
+        <Task color="blue" r={20} size={20} class="abs top:-10 left:36px scale(.8)@<sm" />
       </div>
       <div class="flex flex:column ai:start gap:10px">
-        <h2 id="news" class="f:50px fg:#393939 f:bold">{m.news_heading()}</h2>
-        <span class="f:25px fg:#989492 f:semibold">{m.news_subheading()}</span>
+        <h2 id="news" class="f:50px f:32px@<sm fg:#393939 f:bold">{m.news_heading()}</h2>
+        <span class="f:25px f:16px@<sm fg:#989492 f:semibold">{m.news_subheading()}</span>
       </div>
       <div class="rel w:60px h:100px">
         <Task color="orange" r={-10} size={40} class="abs top:-40px left:0" />
         <Task color="blue" r={10} size={20} class="abs top:-80px left:-20px" />
       </div>
     </div>
-    <ul class="flex flex:column w:900px gap:40px list-style:none" aria-labelledby="news">
+    <ul class="flex flex:column w:900px w:full@<lg max-w:900px gap:40px gap:24px@<sm list-style:none" aria-labelledby="news">
       {#each newsItems as item}
-        <li class="flex flex:column gap:40px">
-          <div class="grid grid-template-columns:100px|100px|1fr gap:80px">
-            <time class="f:19px fg:#393939" datetime={item.date.replaceAll(".", "-")}
+        <li class="flex flex:column gap:40px gap:16px@<sm">
+          <div class="grid grid-template-columns:100px|100px|1fr grid-template-columns:auto|1fr@<sm gap:80px gap:6px|16px@<sm">
+            <time class="f:19px f:14px@<sm fg:#393939" datetime={item.date.replaceAll(".", "-")}
               >{item.date}</time
             >
-            <span class="f:20px f:medium fg:#989492 w:100px">{item.tag}</span>
-            <p class="f:20px f:medium fg:#393939">{item.title}</p>
+            <span class="f:20px f:15px@<sm f:medium fg:#989492 w:100px w:auto@<sm">{item.tag}</span>
+            <p class="f:20px f:15px@<sm f:medium fg:#393939 grid-column:1/3@<sm">{item.title}</p>
           </div>
           <span class="w:full bb:1px|solid|#E6E2E0"></span>
         </li>
@@ -885,7 +998,7 @@
 
   <footer
     bind:this={footerEl}
-    class="bg:#333333 rel w:full h:calc(100dvh-96px) r:48px p:80px flex flex:column gap:60px overflow:hidden"
+    class="bg:#333333 rel w:full h:calc(100dvh-96px) h:70dvh@<sm r:48px r:24px@<sm p:80px p:32px|24px@<sm flex flex:column gap:60px gap:28px@<sm overflow:hidden"
   >
     <div
       class="abs inset:0 z:0"
@@ -906,14 +1019,14 @@
       {/each}
     </div>
 
-    <div class="rel z:1 flex flex:row gap:100px ai:end">
-      <div class="w:200px">
+    <div class="rel z:1 flex flex:row flex:column@<sm gap:100px gap:20px@<sm ai:end ai:start@<sm">
+      <div class="w:200px w:150px@<sm">
         <a href={localizeHref(resolve("/"))} onclick={handleTopClick} aria-label={m.footer_top_aria()}
           ><Logo color="#fff" /></a
         >
       </div>
-      <span class="flex w:2px h:30px bg:#fff"></span>
-      <div class="flex flex:row gap:20px">
+      <span class="flex hidden@<sm w:2px h:30px bg:#fff"></span>
+      <div class="flex flex:row gap:20px gap:16px@<sm">
         {#each links as link}
           <div>
             <a
@@ -928,7 +1041,7 @@
       </div>
     </div>
     <div class="rel z:1">
-      <p class="fg:#A6A3A2">{m.footer_copyright()}</p>
+      <p class="fg:#A6A3A2 f:13px@<sm">{m.footer_copyright()}</p>
     </div>
   </footer>
 </main>

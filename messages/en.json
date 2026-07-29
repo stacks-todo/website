@@ -9,6 +9,8 @@
   "nav_news": "News",
   "nav_buy": "Buy Now",
   "lang_switch_aria": "Switch language",
+  "nav_menu_open_aria": "Open menu",
+  "nav_menu_close_aria": "Close menu",
 
   "hero_pv_title_alt": "Turning busyness into beauty.",
   "hero_pv_alt": "STACKS device showing task volume with a rotating outer frame and task balls",

@@ -20,6 +20,10 @@ body:lang(ja) {
   font-language-override: "ENG"
 }
 
+html {
+	overflow-x: clip;
+}
+
 body {
 	margin: 0;
 	background: #fff;

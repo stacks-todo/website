@@ -9,6 +9,8 @@
   "nav_news": "ニュース",
   "nav_buy": "購入する",
   "lang_switch_aria": "言語を切り替える",
+  "nav_menu_open_aria": "メニューを開く",
+  "nav_menu_close_aria": "メニューを閉じる",
 
   "hero_pv_title_alt": "忙しさを、美しく。",
   "hero_pv_alt": "回転する外枠とタスクボールでタスク量を表示するSTACKS本体",
