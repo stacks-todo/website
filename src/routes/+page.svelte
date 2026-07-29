@@ -442,10 +442,63 @@
 {/if}
 
 <header
-  class="fixed top:48px right:48px top:20px@<sm right:20px@<sm w:fit h:94px h:auto@<sm bg:#fff rbl:40px rbl:24px@<sm z:999 ~width|.45s|cubic-bezier(.22,1,.36,1) {menuOpen
-    ? 'w:240px@<sm'
-    : 'w:64px@<sm'}"
+  class="fixed top:48px right:48px top:20px@<sm right:20px@<sm w:fit w:64px@<sm h:94px h:64px@<sm bg:#fff rbl:40px rbl:24px@<sm z:999"
 >
+  <div
+    id="mobile-menu"
+    inert={!menuOpen}
+    class="abs top:0 right:0 w:calc(100dvw-40px) bg:#fff hidden@sm ~transform|.45s|cubic-bezier(.22,1,.36,1) {menuOpen
+      ? 'translateY(0)'
+      : 'translateY(-100%)'}"
+  >
+    <Notch corner="br" class="abs bottom:-20px left:20px translateX(-100%) w:20px h:20px" />
+    <Notch corner="bl" class="abs bottom:0 right:0 translateY(100%) w:20px h:20px" />
+    <div class="flex flex:column gap:18px pt:64px px:20px pb:24px">
+      <ul class="flex flex:column gap:16px list-style:none f:16px_li f:semibold_li fg:#393939_li">
+        {#each navItems as item}
+          <li>
+            <a
+              href={localizeHref(`${resolve("/")}#${item.id}`)}
+              onclick={(e) => handleAnchorClick(e, item.id)}>{item.label()}</a
+            >
+          </li>
+        {/each}
+      </ul>
+      <span class="w:full bb:1px|solid|#E6E2E0"></span>
+      <div class="flex flex:row ai:center jc:space-between gap:12px">
+        <ul class="flex flex:row gap:10px f:15px f:semibold" aria-label={m.lang_switch_aria()}>
+          {#each locales as l}
+            <li>
+              <button
+                type="button"
+                onclick={() => setLocale(l)}
+                aria-current={getLocale() === l ? "true" : undefined}
+                class="fg:#393939 opacity:{getLocale() === l ? '1' : '.4'}"
+              >{l.toUpperCase()}</button>
+            </li>
+          {/each}
+        </ul>
+        <a
+          href={localizeHref(resolve("/"))}
+          class="flex flex:row ai:center jc:center h:40px r:20px p:6px|18px f:14px gap:8px bg:#18A9BD fg:#fff fill:#fff>svg>path"
+        >
+          <span>{m.nav_buy()}</span>
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 13 13"
+            fill="none"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d="M11.608 0C12.0657 0.000213122 12.4361 0.370395 12.4362 0.828125V8.29004C12.4362 8.74793 12.0649 9.11912 11.6071 9.11914C11.1497 9.1188 10.7784 8.74836 10.778 8.29102V2.83008L1.41565 12.1934C1.09191 12.517 0.566575 12.517 0.242801 12.1934C-0.0809609 11.8696 -0.0809064 11.3443 0.242801 11.0205L9.60608 1.65723H4.14514C3.68777 1.65695 3.31652 1.28643 3.31604 0.829102C3.31604 0.371195 3.68821 -3.37175e-07 4.14612 0H11.608Z"
+            />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
   <Notch corner="bl" class="abs top:0 left:0 translateX(-100%) w:20px@<sm h:20px@<sm" />
   <Notch corner="bl" class="abs bottom:0 right:0 translateY(100%) w:20px@<sm h:20px@<sm" />
   <nav
@@ -519,65 +572,6 @@
       ></span>
     </button>
   </nav>
-  <div
-    id="mobile-menu"
-    inert={!menuOpen}
-    class="grid hidden@sm ~grid-template-rows|.45s|cubic-bezier(.22,1,.36,1) {menuOpen
-      ? 'grid-template-rows:1fr'
-      : 'grid-template-rows:0fr'}"
-  >
-    <div class="overflow:hidden">
-      <div
-        class="flex flex:column gap:18px px:20px pb:24px ~opacity|.3s {menuOpen
-          ? 'opacity:1'
-          : 'opacity:0'}"
-      >
-        <ul class="flex flex:column gap:16px list-style:none f:16px_li f:semibold_li fg:#393939_li">
-          {#each navItems as item}
-            <li>
-              <a
-                href={localizeHref(`${resolve("/")}#${item.id}`)}
-                onclick={(e) => handleAnchorClick(e, item.id)}>{item.label()}</a
-              >
-            </li>
-          {/each}
-        </ul>
-        <span class="w:full bb:1px|solid|#E6E2E0"></span>
-        <div class="flex flex:row ai:center jc:space-between gap:12px">
-          <ul class="flex flex:row gap:10px f:15px f:semibold" aria-label={m.lang_switch_aria()}>
-            {#each locales as l}
-              <li>
-                <button
-                  type="button"
-                  onclick={() => setLocale(l)}
-                  aria-current={getLocale() === l ? "true" : undefined}
-                  class="fg:#393939 opacity:{getLocale() === l ? '1' : '.4'}"
-                >{l.toUpperCase()}</button>
-              </li>
-            {/each}
-          </ul>
-          <a
-            href={localizeHref(resolve("/"))}
-            class="flex flex:row ai:center jc:center h:40px r:20px p:6px|18px f:14px gap:8px bg:#18A9BD fg:#fff fill:#fff>svg>path"
-          >
-            <span>{m.nav_buy()}</span>
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 13 13"
-              fill="none"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <path
-                d="M11.608 0C12.0657 0.000213122 12.4361 0.370395 12.4362 0.828125V8.29004C12.4362 8.74793 12.0649 9.11912 11.6071 9.11914C11.1497 9.1188 10.7784 8.74836 10.778 8.29102V2.83008L1.41565 12.1934C1.09191 12.517 0.566575 12.517 0.242801 12.1934C-0.0809609 11.8696 -0.0809064 11.3443 0.242801 11.0205L9.60608 1.65723H4.14514C3.68777 1.65695 3.31652 1.28643 3.31604 0.829102C3.31604 0.371195 3.68821 -3.37175e-07 4.14612 0H11.608Z"
-              />
-            </svg>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
 </header>
 
 <div class="fixed top:0 left:0 w:100% h:100dvh flex pointer-events:none z:999">
