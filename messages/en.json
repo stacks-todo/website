@@ -43,6 +43,11 @@
   "news_heading": "News",
   "news_subheading": "News",
 
+  "buy_notice_heading": "Coming Soon",
+  "buy_notice_body": "The STACKS purchase page is\ncurrently being prepared.\nPlease wait a little longer.",
+  "buy_notice_cta": "Get the latest updates here",
+  "buy_notice_close_aria": "Close",
+
   "footer_top_aria": "Back to the top of the STACKS page",
   "footer_social_aria": "STACKS official {label} (opens in a new tab)",
   "footer_copyright": "© 2026 STACKS"
