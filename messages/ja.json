@@ -43,6 +43,11 @@
   "news_heading": "お知らせ",
   "news_subheading": "News",
 
+  "buy_notice_heading": "ただいま準備中です",
+  "buy_notice_body": "STACKSの購入ページは、\nただいま準備中です。\nもうしばらくお待ちください。",
+  "buy_notice_cta": "最新情報はこちらから",
+  "buy_notice_close_aria": "閉じる",
+
   "footer_top_aria": "STACKS ページ上部へ戻る",
   "footer_social_aria": "STACKS 公式{label}（新しいタブで開く）",
   "footer_copyright": "© 2026 STACKS"

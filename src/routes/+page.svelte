@@ -71,6 +71,13 @@
   let idleFrames = 0;
   let spawned = false;
   let menuOpen = $state(false);
+  let buyNoticeOpen = $state(false);
+
+  function openBuyNotice(e: MouseEvent) {
+    e.preventDefault();
+    menuOpen = false;
+    buyNoticeOpen = true;
+  }
 
   function isNearBottom(): boolean {
     if (!footerEl) return false;
@@ -289,7 +296,10 @@
   }
 
   function handleWindowKeydown(e: KeyboardEvent) {
-    if (e.key === "Escape") menuOpen = false;
+    if (e.key === "Escape") {
+      menuOpen = false;
+      buyNoticeOpen = false;
+    }
   }
 
   function handleWindowResize() {
@@ -417,6 +427,55 @@
   {@html `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`}
 </svelte:head>
 
+{#if buyNoticeOpen}
+  <button
+    type="button"
+    aria-label={m.buy_notice_close_aria()}
+    onclick={() => (buyNoticeOpen = false)}
+    class="fixed inset:0 z:1000 bg:rgba(0,0,0,.5) b:none p:0"
+  ></button>
+  <div
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="buy-notice-heading"
+    class="fixed top:50% left:50% translate(-50%,-50%) z:1001 w:calc(100%-40px) max-w:400px bg:#fff r:24px p:48px|32px p:36px|24px@<sm flex flex:column ai:center gap:20px text-align:center rel"
+  >
+    <button
+      type="button"
+      aria-label={m.buy_notice_close_aria()}
+      onclick={() => (buyNoticeOpen = false)}
+      class="abs top:16px right:16px w:32px h:32px flex ai:center jc:center b:none bg:transparent"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+        <path
+          d="M1 1L15 15M15 1L1 15"
+          stroke="#393939"
+          stroke-width="1.6"
+          stroke-linecap="round"
+        />
+      </svg>
+    </button>
+    <h2 id="buy-notice-heading" class="f:22px f:bold fg:#393939">{m.buy_notice_heading()}</h2>
+    <p class="f:15px fg:#393939 line-height:1.8">
+      {#each lines(m.buy_notice_body()) as line, i}{#if i > 0}<br />{/if}{line}{/each}
+    </p>
+    <a
+      href={links.find((l) => l.label === "x")?.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex flex:row ai:center jc:center gap:8px h:48px r:24px p:8px|28px bg:#18A9BD fg:#fff f:14px f:semibold"
+    >
+      <span>{m.buy_notice_cta()}</span>
+      <svg width="14" height="14" viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
+        <path
+          d="M26.8435 26.4638L19.0185 14.1663L26.7398 5.6725C26.9144 5.47566 27.0044 5.21791 26.9903 4.95515C26.9761 4.69239 26.859 4.44579 26.6642 4.26882C26.4695 4.09185 26.2129 3.99876 25.95 4.00974C25.687 4.02073 25.4391 4.1349 25.2598 4.3275L17.9048 12.4175L12.8435 4.46375C12.7533 4.32169 12.6286 4.20471 12.4811 4.12365C12.3336 4.04258 12.1681 4.00005 11.9998 4H5.99976C5.82046 3.99991 5.64444 4.04803 5.49012 4.13932C5.3358 4.23062 5.20887 4.36172 5.12261 4.5189C5.03635 4.67609 4.99394 4.85357 4.99981 5.03278C5.00569 5.21198 5.05964 5.3863 5.15601 5.5375L12.981 17.8337L5.25976 26.3337C5.1696 26.4306 5.09955 26.5444 5.05369 26.6685C5.00782 26.7927 4.98705 26.9247 4.99257 27.0569C4.99809 27.1891 5.02981 27.3189 5.08587 27.4388C5.14193 27.5586 5.22122 27.6662 5.31915 27.7552C5.41708 27.8442 5.53171 27.9129 5.65637 27.9572C5.78104 28.0016 5.91328 28.0208 6.04542 28.0137C6.17756 28.0066 6.30697 27.9733 6.42616 27.9158C6.54535 27.8583 6.65194 27.7777 6.73976 27.6787L14.0948 19.5888L19.156 27.5425C19.247 27.6834 19.372 27.7991 19.5194 27.8791C19.6669 27.959 19.832 28.0006 19.9998 28H25.9998C26.1789 27.9999 26.3547 27.9518 26.5088 27.8606C26.6629 27.7693 26.7897 27.6384 26.876 27.4814C26.9622 27.3244 27.0047 27.1472 26.9989 26.9681C26.9932 26.7891 26.9396 26.6149 26.8435 26.4638ZM20.5485 26L7.82101 6H11.446L24.1785 26H20.5485Z"
+          fill="white"
+        />
+      </svg>
+    </a>
+  </div>
+{/if}
+
 {#if menuOpen}
   <button
     type="button"
@@ -463,9 +522,10 @@
             </li>
           {/each}
         </ul>
-        <a
-          href={localizeHref(resolve("/"))}
-          class="flex flex:row ai:center jc:center h:40px r:20px p:6px|18px f:14px gap:8px bg:#18A9BD fg:#fff fill:#fff>svg>path"
+        <button
+          type="button"
+          onclick={openBuyNotice}
+          class="flex flex:row ai:center jc:center h:40px r:20px p:6px|18px f:14px gap:8px bg:#18A9BD fg:#fff fill:#fff>svg>path b:none"
         >
           <span>{m.nav_buy()}</span>
           <svg
@@ -480,7 +540,7 @@
               d="M11.608 0C12.0657 0.000213122 12.4361 0.370395 12.4362 0.828125V8.29004C12.4362 8.74793 12.0649 9.11912 11.6071 9.11914C11.1497 9.1188 10.7784 8.74836 10.778 8.29102V2.83008L1.41565 12.1934C1.09191 12.517 0.566575 12.517 0.242801 12.1934C-0.0809609 11.8696 -0.0809064 11.3443 0.242801 11.0205L9.60608 1.65723H4.14514C3.68777 1.65695 3.31652 1.28643 3.31604 0.829102C3.31604 0.371195 3.68821 -3.37175e-07 4.14612 0H11.608Z"
             />
           </svg>
-        </a>
+        </button>
       </div>
     </div>
   </div>
@@ -515,9 +575,10 @@
         </ul>
       </li>
       <li>
-        <a
-          href={localizeHref(resolve("/"))}
-          class="flex flex:row ai:center jc:center h:48px r:25px p:8px|30px gap:8px bg:#18A9BD fg:#fff fill:#fff>svg>path"
+        <button
+          type="button"
+          onclick={openBuyNotice}
+          class="flex flex:row ai:center jc:center h:48px r:25px p:8px|30px gap:8px bg:#18A9BD fg:#fff fill:#fff>svg>path b:none"
         >
           <span>{m.nav_buy()}</span>
           <svg
@@ -532,7 +593,7 @@
               d="M11.608 0C12.0657 0.000213122 12.4361 0.370395 12.4362 0.828125V8.29004C12.4362 8.74793 12.0649 9.11912 11.6071 9.11914C11.1497 9.1188 10.7784 8.74836 10.778 8.29102V2.83008L1.41565 12.1934C1.09191 12.517 0.566575 12.517 0.242801 12.1934C-0.0809609 11.8696 -0.0809064 11.3443 0.242801 11.0205L9.60608 1.65723H4.14514C3.68777 1.65695 3.31652 1.28643 3.31604 0.829102C3.31604 0.371195 3.68821 -3.37175e-07 4.14612 0H11.608Z"
             />
           </svg>
-        </a>
+        </button>
       </li>
     </ul>
     <button
