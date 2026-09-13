@@ -438,7 +438,7 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="buy-notice-heading"
-    class="fixed top:50% left:50% translate(-50%,-50%) z:1001 w:calc(100%-40px) max-w:400px bg:#fff r:24px p:48px|32px p:36px|24px@<sm flex flex:column ai:center gap:20px text-align:center rel"
+    class="fixed top:50% left:50% translate(-50%,-50%) z:1001 w:calc(100%-40px) max-w:400px bg:#fff r:24px p:48px|32px p:36px|24px@<sm flex flex:column ai:center gap:20px text-align:center"
   >
     <button
       type="button"
